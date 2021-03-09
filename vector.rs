@@ -28,9 +28,9 @@ impl Vector {
 	/// @param {number[]} one vector, n-dimensions
 	/// @param {number} one scalar
 	/// @returns {number[]} one vector
-	// fn scale (&self, t: f64) -> Vector {
-	// 	Vector { x: self.x * t, y: self.y * t }
-	// }
+	pub fn scale (&self, t: f64) -> Vector {
+		Vector { x: self.x * t, y: self.y * t }
+	}
 	///
 	/// @param {number[]} one vector, n-dimensions
 	/// @param {number[]} one vector, n-dimensions
@@ -100,6 +100,11 @@ impl Vector {
 	/// @returns boolean
 	pub fn is_degenerate (&self) -> bool {
 		(self.x.abs() + self.y.abs()) < EPSILON
+	}
+
+	pub fn equivalent (&self, u: &Vector) -> bool {
+		(self.x - u.x).abs() < EPSILON &&
+		(self.y - u.y).abs() < EPSILON
 	}
 
 	// todo: should we use cross product to determine parallel?

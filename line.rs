@@ -1,15 +1,36 @@
-// mod vector;
 use Vector;
 use std::fmt;
 
-// const EPSILON: f64 = 0.00000001;
+const EPSILON: f64 = 0.00000001;
 
 pub struct Line {
 	pub u: Vector,
 	pub d: f64
 }
 
-// impl Line {
+impl Line {
+	pub fn intersect (&self, l: &Line) -> (bool, Vector) {
+		let det = self.u.determinant(&l.u);
+		if det.abs() < EPSILON {
+			return (false, Vector { x: 0.0, y: 0.0 })
+		}
+		let x = self.d * &l.u.y - l.d * self.u.y;
+		let y = l.d * self.u.x - self.d * &l.u.x;
+		return (true, Vector { x: x / det, y: y / det });
+	}
+	pub fn equivalent (&self, l: &Line) -> bool {
+		// println!("1. self {:?}", self);
+		// println!("2. l {:?}", l);
+		// println!("3. {}", self.d);
+		// println!("4. {}", (l.d * self.u.dot(&l.u)));
+		// println!("5. {}", (self.d - l.d * self.u.dot(&l.u)));
+		(self.u.dot(&l.u.rotate90()).abs() < EPSILON) && // parallel
+		(self.d - l.d * self.u.dot(&l.u) < EPSILON)
+	}
+	// implicit is this clips inside the unit square x/y: (0..1)
+	// pub fn clip (&self) -> (bool, Segment) {
+
+	// }
 // 	fn bisect_lines2 (&self, &l: Line) -> (Line, Line) {
 // 		const determinant = cross2(vectorA, vectorB);
 // 		const dotProd = dot(vectorA, vectorB);
@@ -30,7 +51,7 @@ pub struct Line {
 // 		if (isParallel) { delete solution[(dotProd > -epsilon ? 1 : 0)]; }
 // 		return solution;
 // 	}
-// }
+}
 
 impl fmt::Debug for Line {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

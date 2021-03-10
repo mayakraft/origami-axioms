@@ -3,76 +3,21 @@ mod line;
 mod segment;
 mod square;
 mod axioms;
+mod tests;
+mod draw;
 use vector::Vector;
 use line::Line;
 use segment::Segment;
 use square::Square;
+use tests::run_tests;
+use draw::draw;
 
-fn vector_tests () {
-	let sqrt2 = (2.0_f64).sqrt();
-	let v: Vector = Vector { x: 1.2, y: -0.8 };
-	let u: Vector = Vector { x: 2.0, y: 2.0 };
-	let l = Line { u: Vector { x: 1.0, y: 0.0 }, d: 1.0 };
-	let m = Line { u: Vector { x: -sqrt2, y: sqrt2 }, d: 1.0 };
-	// let m = Line { u: Vector { x: 0.0, y: 1.0 }, d: 1.0 };
-	let mag1: f64 = u.magnitude();
-	let mag2: f64 = u.normalize().magnitude();
-	let norm: Vector = u.normalize();
-	let rot90: Vector = u.normalize().rotate90();
-	let rot270: Vector = u.normalize().rotate270();
-	let flip: Vector = v.flip();
-	let dot: f64 = u.dot(&v);
-	let determ: f64 = v.determinant(&u);
-	let degenerate: bool = u.is_degenerate();
-	let parallel: bool = u.is_parallel(&v);
-	let (success, intersect) = l.intersect(&m);
-	let equivalent: bool = u.equivalent(&v);
-	println!("magnitude {}", mag1);
-	println!("magnitude {}", mag2);
-	println!("normalized {} {}", norm.x, norm.y);
-	println!("rotate 90 {} {}", rot90.x, rot90.y);
-	println!("rotate 270 {} {}", rot270.x, rot270.y);
-	println!("flip {} {}", flip.x, flip.y);
-	println!("dot {}", dot);
-	println!("determinant {}", determ);
-	println!("degenerate {}", degenerate);
-	println!("parallel {}", parallel);
-	println!("equivalent {}", equivalent);
-	println!("intersect {} {} {}", success, intersect.x, intersect.y);
-}
-
-fn line_tests () {
-	let a = Line {
-		u: Vector { x: 0.7071067811865475, y: 0.7071067811865475},
-		d: 0.7071067811865475
-	};
-	let b = Line {
-		u: Vector { x: 1.0, y: 0.0},
-		d: 0.5
-	};
-	// let equivalent: bool = a.equivalent(&b);
-	let equivalent: bool = b.equivalent(&a);
-	println!("are these equivalent? {}", equivalent);
-
-	// make sure these should be duplicate
-	// test if they are duplicate
-	// duplicate test Line { x: -1.0, y: 0.0, d: -0.5 } Line { x: 1.0, y: 0.0, d: 0.5 }
-
-}
-
-fn axiom_tests () {
-	let u: &Vector = &Vector { x: 2.0, y: 2.0 };
-	let v: &Vector = &Vector { x: 1.2, y: -0.8 };
-	let l: &Line = &Line { u: Vector { x: 1.0, y: 0.0 }, d: 1.0 };
-	let m: &Line = &Line { u: Vector { x: 0.0, y: 1.0 }, d: 1.0 };
-	let ax1 = axioms::axiom1(u, v);
-	let ax2 = axioms::axiom2(u, v);
-	let (ax3a, ax3b) = axioms::axiom3(l, m);
-	println!("axiom 1 ({}, {}) {}", ax1.u.x, ax1.u.y, ax1.d);
-	println!("axiom 2 ({}, {}) {}", ax2.u.x, ax2.u.y, ax2.d);
-	println!("axiom 3a ({}, {}) {}", ax3a.u.x, ax3a.u.y, ax3a.d);
-	println!("axiom 3b ({}, {}) {}", ax3b.u.x, ax3b.u.y, ax3b.d);
-}
+const UNIT_SQUARE: Square = Square {
+	a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+	b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+	c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+	d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+};
 
 // fn compute_axiom1 (
 // 	points: &mut Vec<(Vector, u64)>,
@@ -108,9 +53,10 @@ fn compute_axiom2 (
 			//  - if t: increment line:count in printed line
 			//  - if f: test #2
 			for k in 0..lines.len() {
-				if lines[k].0.equivalent(&line) {
+				if line.equivalent(&lines[k].0) {
 					lines[k].1 += 1;
 					duplicate = true;
+					// println!("found duplicate {:?} {:?}", lines[k].0, line);
 					break;
 				}
 			}
@@ -119,9 +65,10 @@ fn compute_axiom2 (
 			//  - if t: increment line:count in current line
 			//  - if f: add new entry to current round. with 0
 			for k in 0..round.len() {
-				if round[k].0.equivalent(&line) {
+				if line.equivalent(&round[k].0) {
 					round[k].1 += 1;
 					duplicate = true;
+					// println!("found duplicate {:?} {:?}", round[k].0, line);
 					break;
 				}
 			}
@@ -152,74 +99,119 @@ fn compute_axiom2 (
 // 	return round;
 // }
 
+fn compute_intersections (
+	points: &mut Vec<(Vector, u64)>, // already existing intersection points
+	new_lines: &mut Vec<(Line, u64)> // the newest set of lines
+) -> Vec<(Vector, u64)> {
+	let mut round: Vec<(Vector, u64)> = Vec::new();
+	if new_lines.len() == 0 { return round }
+
+	for i in 0..new_lines.len() - 1 {
+		// println!("{}: {} new points", i, round.len());
+		for j in (i + 1)..new_lines.len() {
+			let (success, point) = new_lines[i].0.intersect(&new_lines[j].0);
+			if !success { continue }
+			if !UNIT_SQUARE.contains(&point) { continue }
+			let mut duplicate = false;
+			for k in 0..points.len() {
+				if point.equivalent(&points[k].0) {
+					points[k].1 += 1;
+					duplicate = true;
+					// println!("found duplicate {:?} {:?}", points[k].0, point);
+					break;
+				}
+			}
+			if duplicate { continue }
+			for k in 0..round.len() {
+				if point.equivalent(&round[k].0) {
+					round[k].1 += 1;
+					duplicate = true;
+					// println!("found duplicate {:?} {:?}", round[k].0, point);
+					break;
+				}
+			}
+			if duplicate { continue }
+			round.push((point, 1));
+		}
+	}
+	return round;
+}
+
 fn main () {
-	vector_tests();
-	axiom_tests();
-	line_tests();
+	run_tests();
+
 	let mut points: Vec<(Vector, u64)> = Vec::new();
 	let mut lines: Vec<(Line, u64)> = Vec::new();
 	points.push((Vector { x: 0.0, y: 0.0 }, 1));
 	points.push((Vector { x: 1.0, y: 0.0 }, 1));
 	points.push((Vector { x: 1.0, y: 1.0 }, 1));
 	points.push((Vector { x: 0.0, y: 1.0 }, 1));
-	let mut round1_lines = compute_axiom2(&mut points, &mut lines);
 
-	// for i in 0..4 {
-	// 	println!("{}", i);
-	// }
-
-	// after all axioms are computed this round
-	// 1. compute new intersection points
-	// 2. merge lines from last round
-	let mut round1_points: Vec<(Vector, u64)> = Vec::new();
-
-	for i in 0..round1_lines.len() - 1 {
-		for j in (i + 1)..round1_lines.len() {
-			let (success, point) = round1_lines[i].0.intersect(&round1_lines[j].0);
-			if !success { continue }
-			let mut duplicate = false;
-			for k in 0..points.len() {
-				if points[k].0.equivalent(&point) {
-					points[k].1 += 1;
-					duplicate = true;
-					break;
-				}
-			}
-			if duplicate { continue }
-			for k in 0..round1_points.len() {
-				if round1_points[k].0.equivalent(&point) {
-					round1_points[k].1 += 1;
-					duplicate = true;
-					break;
-				}
-			}
-			if duplicate { continue }
-			round1_points.push((point, 1));
-		}
-	}
-
-	// merge points and lines from last round
+	// 1. compute all axioms for this round
+	let mut round1_lines: Vec<(Line, u64)> = compute_axiom2(
+		&mut points, &mut lines);
+	// 2. compute new intersection points
+	let mut round1_points: Vec<(Vector, u64)> = compute_intersections(
+		&mut points, &mut round1_lines);
+	// 3. merge points and lines from this new round
 	points.append(&mut round1_points);
 	lines.append(&mut round1_lines);
 
-	println!("{:?}", lines);
-	let mut round2_lines = compute_axiom2(&mut points, &mut lines);
+	// round 2!
+	// 1. compute all axioms for this round
+	let mut round2_lines: Vec<(Line, u64)> = compute_axiom2(
+		&mut points, &mut lines);
+	// 2. compute new intersection points
+	let mut round2_points: Vec<(Vector, u64)> = compute_intersections(
+		&mut points, &mut round2_lines);
+	// 3. merge points and lines from this new round
+	points.append(&mut round2_points);
 	lines.append(&mut round2_lines);
-	println!("{:?}", lines);
 
+	println!("..finished axioms round 2 ({} lines {} points)", lines.len(), points.len());
 
-	let unit_square: Square = Square {
-		a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-		b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-		c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-		d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
-	};
+	// round 3
+	// 1. compute all axioms for this round
+	let mut round3_lines: Vec<(Line, u64)> = compute_axiom2(
+		&mut points, &mut lines);
+	// 2. compute new intersection points
+	let mut round3_points: Vec<(Vector, u64)> = compute_intersections(
+		&mut points, &mut round3_lines);
+	// 3. merge points and lines from this new round
+	points.append(&mut round3_points);
+	lines.append(&mut round3_lines);
 
+	println!("..finished axioms round 3 ({} lines {} points)", lines.len(), points.len());
 
-	// let mut segments: Vec<Segment> = Vec::new();
-	// for i in 0..lines.len() {
-	// 	let (success, segment) = unit_square.clip(&lines[i].0);
-	// 	if success { segments.push(segment) }
-	// }
-	// println!("{:?}", segments);	
+	// round 4
+	// 1. compute all axioms for this round
+	let mut round4_lines: Vec<(Line, u64)> = compute_axiom2(
+		&mut points, &mut lines);
+	println!("  axiom done ({} lines)", round4_lines.len());
+	// 2. compute new intersection points
+	let mut round4_points: Vec<(Vector, u64)> = compute_intersections(
+		&mut points, &mut round4_lines);
+	// 3. merge points and lines from this new round
+	println!("  intersections done");
+	points.append(&mut round4_points);
+	lines.append(&mut round4_lines);
+
+	println!("..finished axioms round 4 ({} lines {} points)", lines.len(), points.len());
+
+	let mut segments: Vec<Segment> = Vec::new();
+	for i in 0..lines.len() {
+		let (success, segment) = UNIT_SQUARE.clip(&lines[i].0);
+		if success { segments.push(segment) }
+	}
+
+	println!("..lines clipped to segments");
+
+	let marks: Vec<Vector> = points.iter()
+		.map(|el| el.0)
+		.collect::<Vec<Vector>>();
+
+	println!("{} lines, {} segments, {} points", lines.len(), segments.len(), points.len());
+	draw(&segments, &marks);
+
+	println!("..svg saved");
 }

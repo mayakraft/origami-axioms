@@ -3,6 +3,7 @@ use std::fmt;
 
 const EPSILON: f64 = 0.00000001;
 
+#[derive(Copy, Clone)]
 pub struct Line {
 	pub u: Vector,
 	pub d: f64
@@ -19,13 +20,12 @@ impl Line {
 		return (true, Vector { x: x / det, y: y / det });
 	}
 	pub fn equivalent (&self, l: &Line) -> bool {
-		// println!("1. self {:?}", self);
-		// println!("2. l {:?}", l);
-		// println!("3. {}", self.d);
-		// println!("4. {}", (l.d * self.u.dot(&l.u)));
-		// println!("5. {}", (self.d - l.d * self.u.dot(&l.u)));
-		(self.u.dot(&l.u.rotate90()).abs() < EPSILON) && // parallel
-		(self.d - l.d * self.u.dot(&l.u) < EPSILON)
+		// check if lines are parallel
+		(self.u.dot(&l.u.rotate90()).abs() < EPSILON) &&
+		// instead of simply comparing the .d values,
+		// scale the incoming by the dot prod of both .u normals
+		// this allows (1,0) and (-1,0) to be treated the same
+		((self.d - l.d * self.u.dot(&l.u)).abs() < EPSILON)
 	}
 	// implicit is this clips inside the unit square x/y: (0..1)
 	// pub fn clip (&self) -> (bool, Segment) {

@@ -2,6 +2,8 @@ use std::fmt;
 
 const EPSILON: f64 = 0.00000001;
 
+
+#[derive(Copy, Clone)]
 pub struct Vector {
 	pub x: f64,
 	pub y: f64
@@ -103,8 +105,10 @@ impl Vector {
 	}
 
 	pub fn equivalent (&self, u: &Vector) -> bool {
-		(self.x - u.x).abs() < EPSILON &&
-		(self.y - u.y).abs() < EPSILON
+		self.x - u.x < EPSILON &&
+		self.x - u.x > -EPSILON &&
+		self.y - u.y < EPSILON &&
+		self.y - u.y > -EPSILON
 	}
 
 	// todo: should we use cross product to determine parallel?

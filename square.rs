@@ -4,6 +4,7 @@ use Segment;
 
 const EPSILON: f64 = 0.00000001;
 
+#[derive(Copy, Clone)]
 pub struct Square {
 	pub a: Line,
 	pub b: Line,
@@ -47,21 +48,21 @@ impl Square {
 		let vector = l.u.rotate90();
 		let mut ts: Vec<f64> = Vec::new();
 		for i in 0..results.len() {
-			ts[i] = results[i].subtract(&origin).dot(&vector);
+			ts.push(results[i].subtract(&origin).dot(&vector));
 		}
-		let mut smallest = 0;
-		let mut largest = 0;
-		for i in 0..ts.len() {
-			if ts[i] < ts[smallest] { smallest = i }
-			if ts[i] > ts[largest] { largest = i }
+		let mut smallest = ts[0];
+		let mut largest = ts[0];
+		for i in 1..ts.len() {
+			if ts[i] < smallest { smallest = ts[i] }
+			if ts[i] > largest { largest = ts[i] }
 		}
-		if (ts[smallest] - ts[largest]).abs() < EPSILON {
+		if (smallest - largest).abs() < EPSILON {
 			return (false,
 				Segment {a:Vector {x:0.0, y:0.0}, b:Vector {x:0.0, y:0.0}});
 		}
 		return (true, Segment {
-			a: origin.add(&vector.scale(ts[smallest])),
-			b: origin.add(&vector.scale(ts[largest]))
+			a: origin.add(&vector.scale(smallest)),
+			b: origin.add(&vector.scale(largest))
 		});
 	}
 }

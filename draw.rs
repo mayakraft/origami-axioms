@@ -25,7 +25,7 @@ fn svg_lines (segments: &Vec<Segment>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
-		string.push_str("<line ");
+		string.push_str("<line opacity=\"1.0\" ");
 		string.push_str(&format!("x1=\"{}\" ", segments[i].a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].a.y));
 		string.push_str(&format!("x2=\"{}\" ", segments[i].b.x));
@@ -49,7 +49,7 @@ fn write(string: &String) -> std::io::Result<()> {
 pub fn draw (segments: &Vec<Segment>, points: &Vec<Vector>) {
 	let mut svg: String = String::new();
 	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.02 -0.02 1.04 1.04\" width=\"600px\" height=\"600px\">\n");
-	svg.push_str("<g fill=\"none\" stroke=\"black\" stroke-width=\"0.001\">\n");
+	svg.push_str("<g fill=\"none\" stroke=\"black\" stroke-width=\"0.00025\">\n");
 	svg.push_str("<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" />\n");
 	svg.push_str(&svg_lines(&segments));
 	svg.push_str("</g>\n");

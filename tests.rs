@@ -19,6 +19,7 @@ fn vector_tests () {
 	// let m = Line { u: Vector { x: 0.0, y: 1.0 }, d: 1.0 };
 	let mag1: f64 = u.magnitude();
 	let mag2: f64 = u.normalize().magnitude();
+	let mag3: f64 = u.magnitude_squared();
 	let norm: Vector = u.normalize();
 	let rot90: Vector = u.normalize().rotate90();
 	let rot270: Vector = u.normalize().rotate270();
@@ -31,6 +32,7 @@ fn vector_tests () {
 	let equivalent: bool = u.equivalent(&v);
 	assert_delta!(mag1, 2.8284271247461903, EPSILON);
 	assert_delta!(mag2, 1.0, EPSILON);
+	assert_delta!(mag3, 8.0, EPSILON);
 	assert_delta!(norm.x, (2.0_f64).sqrt() / 2.0, EPSILON);
 	assert_delta!(norm.y, (2.0_f64).sqrt() / 2.0, EPSILON);
 	assert_delta!(rot90.x, -(2.0_f64).sqrt() / 2.0, EPSILON);

@@ -66,3 +66,4 @@ impl Square {
 		});
 	}
 }
+

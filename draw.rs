@@ -50,7 +50,7 @@ pub fn draw (segments: &Vec<Segment>, points: &Vec<Vector>) {
 	let mut svg: String = String::new();
 	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.02 -0.02 1.04 1.04\" width=\"600px\" height=\"600px\">\n");
 	svg.push_str("<g fill=\"none\" stroke=\"black\" stroke-width=\"0.002\">\n");
-	svg.push_str("<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" />\n");
+	// svg.push_str("<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" />\n");
 	svg.push_str(&svg_lines(&segments));
 	svg.push_str("</g>\n");
 	svg.push_str("<g fill=\"#e53\" stroke=\"none\">\n");

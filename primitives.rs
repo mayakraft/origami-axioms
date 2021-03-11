@@ -20,9 +20,6 @@ pub struct Segment {
 	pub b: Vector
 }
 
-const BUCKET: usize = 100;
-const BUCKET_F: f64 = 100.0;
-
 impl Vector {
 	pub fn magnitude (&self) -> f64 { (self.x * self.x + self.y * self.y).sqrt() }
 	pub fn magnitude_squared (&self) -> f64 { self.x * self.x + self.y * self.y }
@@ -65,13 +62,6 @@ impl Vector {
 	// fn distance (&self, u: &Vector) -> f64 {
 	// 	Vector { x: self.x - u.x, y: self.y - u.y }.magnitude()
 	// }
-    pub fn index (&self) -> (usize, usize) {
-        let mut i: usize = (self.x * BUCKET_F).floor() as usize;
-        if i == BUCKET { i = 99 }
-        let mut j: usize = (self.y * BUCKET_F).floor() as usize;
-        if j == BUCKET { j = 99 }
-        return (i, j);
-    }
 }
 
 impl Line {

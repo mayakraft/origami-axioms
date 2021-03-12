@@ -3,14 +3,14 @@ use std::io::prelude::*;
 use Vector;
 use Segment;
 
-fn svg_points (points: &Vec<Vector>) -> String {
+fn svg_points (points: &Vec<&Vector>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	for i in 0..points.len() {
 		let mut string: String = String::new();
 		string.push_str("<circle ");
 		string.push_str(&format!("cx=\"{}\" ", points[i].x));
 		string.push_str(&format!("cy=\"{}\" ", points[i].y));
-		string.push_str(&format!("r=\"{}\" ", 0.001));
+		string.push_str(&format!("r=\"{}\" ", 0.0005));
 		string.push_str("/>\n");
 		strings.push(string);
 	}
@@ -21,15 +21,16 @@ fn svg_points (points: &Vec<Vector>) -> String {
 	return string;
 }
 
-fn svg_lines (segments: &Vec<Segment>) -> String {
+fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
-		string.push_str("<line opacity=\"0.1\" ");
-		string.push_str(&format!("x1=\"{}\" ", segments[i].a.x));
-		string.push_str(&format!("y1=\"{}\" ", segments[i].a.y));
-		string.push_str(&format!("x2=\"{}\" ", segments[i].b.x));
-		string.push_str(&format!("y2=\"{}\" ", segments[i].b.y));
+        let opacity: f64 = ((segments[i].1 as f64) / 50.0).powf(0.3);
+		string.push_str(&format!("<line opacity=\"{}\" ", opacity));
+		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
+		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));
+		string.push_str(&format!("x2=\"{}\" ", segments[i].0.b.x));
+		string.push_str(&format!("y2=\"{}\" ", segments[i].0.b.y));
 		string.push_str("/>\n");
 		strings.push(string);
 	}
@@ -46,16 +47,17 @@ fn write(string: &String) -> std::io::Result<()> {
 	Ok(())
 }
 
-pub fn draw (segments: &Vec<Segment>, points: &Vec<Vector>) {
+pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&Vector>) {
 	let mut svg: String = String::new();
 	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.02 -0.02 1.04 1.04\" width=\"600px\" height=\"600px\">\n");
-	svg.push_str("<g fill=\"none\" stroke=\"black\" stroke-width=\"0.002\">\n");
+	svg.push_str("<g fill=\"none\" stroke=\"black\" stroke-width=\"0.0005\">\n");
 	// svg.push_str("<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" />\n");
 	svg.push_str(&svg_lines(&segments));
 	svg.push_str("</g>\n");
 	svg.push_str("<g fill=\"#e53\" stroke=\"none\">\n");
-	svg.push_str(&svg_points(&points));
+	svg.push_str(&svg_points(points));
 	svg.push_str("</g>\n");
 	svg.push_str("</svg>\n");
 	let _res = write(&svg);
 }
+

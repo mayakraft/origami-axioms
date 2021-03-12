@@ -180,19 +180,17 @@ fn main () {
 		// 	i, lines.len(), points.len());
 	}
 
-	let mut segments: Vec<Segment> = Vec::new();
+	let mut segments: Vec<(Segment, u64)> = Vec::new();
 	for i in 0..lines.len() {
 		let (success, segment) = unit_square.clip(&lines[i].0);
-		if success { segments.push(segment) }
+		if success { segments.push((segment, lines[i].1)) }
 	}
 
-	// let marks: Vec<Vector> = points.iter()
-	// 	.map(|el| el.0)
-	// 	.collect::<Vec<Vector>>();
-
-	let marks: Vec<Vector> = Vec::new();
-
-	// println!("{} lines, {} segments, {} points", lines.len(), segments.len(), points.len());
+    // let marks: Vctor> = points.flatten();
+	let marks: Vec<&Vector> = Vec::new();
+	
+    // println!("{} lines, {} segments, {} points", lines.len(), segments.len(), points.len());
 	println!("{} lines, {} segments, {} points", lines.len(), segments.len(), points.len());
 	draw(&segments, &marks);
 }
+

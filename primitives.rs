@@ -1,6 +1,6 @@
 use std::fmt;
 
-const EPSILON: f64 = 0.00000001;
+const EPSILON: f64 = 1.0e-8;
 
 #[derive(Copy, Clone)]
 pub struct Vector {
@@ -59,9 +59,9 @@ impl Vector {
 	// 	let s = 1.0 - t;
 	// 	return Vector { x: self.x * s + u.x * t, y: self.y * s + u.y * t };
 	// }
-	// fn distance (&self, u: &Vector) -> f64 {
-	// 	Vector { x: self.x - u.x, y: self.y - u.y }.magnitude()
-	// }
+	pub fn distance_to (&self, u: &Vector) -> f64 {
+		Vector { x: self.x - u.x, y: self.y - u.y }.magnitude()
+	}
 }
 
 impl Line {

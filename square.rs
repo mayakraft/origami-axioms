@@ -2,7 +2,7 @@ use Vector;
 use Line;
 use Segment;
 
-const EPSILON: f64 = 0.00000001;
+const EPSILON: f64 = 1.0e-8;
 
 #[derive(Copy, Clone)]
 pub struct Square {

@@ -1,6 +1,7 @@
 use Vector;
 use Line;
 use axioms;
+use Square;
 
 const EPSILON: f64 = f64::EPSILON * 10.0;
 
@@ -71,6 +72,13 @@ fn line_tests () {
 }
 
 fn axiom_tests () {
+    let unit_square: Square = Square {
+        a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+        b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+        c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+        d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+    };
+
 	let t: Vector = Vector { x: 1.01, y: 0.0 };
 	let o: Vector = Vector { x: 0.0, y: 0.0 };
 	let u: Vector = Vector { x: 2.0, y: 2.0 };
@@ -83,15 +91,17 @@ fn axiom_tests () {
 	let s: Line = Line { u: Vector { x: 1.0, y: 0.0 }, d: 2.0 };
 	let ax1 = axioms::axiom1(&u, &v);
 	let ax2 = axioms::axiom2(&u, &v);
-	let ax3a = axioms::axiom3(&l, &m);
-	let ax3b = axioms::axiom3(&m, &n);
-	let ax4 = axioms::axiom4(&v, &r);
-	let ax5 = axioms::axiom5(&t, &o, &s);
-	let ax7 = axioms::axiom7(&o, &r, &l);
+	let ax3a = axioms::axiom3(&l, &m, &unit_square);
+	let ax3b = axioms::axiom3(&m, &n, &unit_square);
+	let ax4 = axioms::axiom4(&v, &r, &unit_square);
+	let ax5 = axioms::axiom5(&t, &o, &s, &unit_square);
+	let ax6 = axioms::axiom6(&t, &o, &s, &r, &unit_square);
+	let ax7 = axioms::axiom7(&o, &r, &l, &unit_square);
     println!("{:?}", ax3a);
     println!("{:?}", ax3b);
     println!("axiom 4 {:?}", ax4);
     println!("axiom 5 {:?}", ax5);
+    println!("axiom 6 {:?}", ax6);
     println!("axiom 7 {:?}", ax7);
 	assert_delta!(ax1.u.x, 0.9615239476408233, EPSILON);
 	assert_delta!(ax1.u.y, -0.2747211278973781, EPSILON);

@@ -25,7 +25,7 @@ fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
-        let opacity: f64 = ((segments[i].1 as f64) / 50.0).powf(0.3);
+        let opacity: f64 = ((segments[i].1 as f64) / 5.0).powf(0.3);
 		string.push_str(&format!("<line opacity=\"{}\" ", opacity));
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));

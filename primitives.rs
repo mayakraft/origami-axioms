@@ -52,9 +52,12 @@ impl Vector {
 	pub fn is_parallel (&self, u: &Vector) -> bool {
 		(1.0 - self.normalize().dot(&u.normalize()).abs()) < EPSILON
 	}
-	// fn midpoint (&self, u: &Vector) -> Vector {
-	// 	Vector { x: (self.x + u.x) / 2.0, y: (self.y + u.y) / 2.0 }
-	// }
+    // pub fn midpoint (&self, u: &Vector) -> Vector {
+    //     self.add(u).scale(0.5)
+    // }
+	pub fn midpoint (&self, u: &Vector) -> Vector {
+		Vector { x: (self.x + u.x) / 2.0, y: (self.y + u.y) / 2.0 }
+	}
 	// fn lerp (&self, u: &Vector, t: f64) -> Vector {
 	// 	let s = 1.0 - t;
 	// 	return Vector { x: self.x * s + u.x * t, y: self.y * s + u.y * t };

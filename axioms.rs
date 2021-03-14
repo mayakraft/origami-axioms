@@ -47,7 +47,7 @@ pub fn axiom4 (a: &Vector, b: &Line, boundary: &Square) -> Vec<Line> {
 
 // p1 is the point the line will pass through
 // p2 is the point that will fold onto the line
-pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, _boundary: &Square) -> Vec<Line> {
+pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, boundary: &Square) -> Vec<Line> {
     let p1base = p1.dot(&l.u);
     let a = l.d - p1base;  // maybe reverse
     let c = p1.distance_to(&p2);
@@ -57,30 +57,28 @@ pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, _boundary: &Square) -> Vec<Li
     let a_vec = l.u.scale(a); // maybe reverse
     let base_center = p1.add(&a_vec);
     let base_vector = l.u.rotate90().scale(b);
-    let p2_a = base_center.add(&base_vector);
-    let p2_b = base_center.subtract(&base_vector);
-    let u_a = p2.subtract(&p2_a).normalize();
-    let u_b = p2.subtract(&p2_b).normalize();
-    let d_a = p1.dot(&u_a);
-    let d_b = p1.dot(&u_b);
-    return vec![ Line { u: u_a, d: d_a }, Line { u: u_b, d: d_b } ];
+    let mirrors: [Vector; 2] = [
+        base_center.add(&base_vector),
+        base_center.subtract(&base_vector)
+    ];
+    // for each construction to be valid its mirror point must be in the boundary
+    let mut solutions: Vec<Line> = vec![];
+    for i in 0..2 {
+        if boundary.contains(&mirrors[0]) {
+            let u = p2.subtract(&mirrors[i]).normalize();
+            solutions.push(Line { u, d: p1.dot(&u) });
+        }
+    }
+    return solutions;
 }
 
 fn cubrt (n: f64) -> f64 {
     if n < 0.0 { -(-n).powf(1.0/3.0) } else { n.powf(1.0/3.0) }
 }
 
-fn make_point (root: f64, line: &Line, line_vec: &Vector) -> Vector {
-    line.u.scale(line.d).add(&line_vec.scale(root))
-}
-
-fn polynomial (
-    degree: u64, a: f64, b: f64, c: f64, d: f64, line: &Line, line_vec: &Vector
-) -> Vec<Vector> {
+fn polynomial (degree: u8, a: f64, b: f64, c: f64, d: f64) -> Vec<f64> {
 	// linear
-    if degree == 1 {
-        return vec![make_point(-d / c, line, line_vec)];
-    }
+    if degree == 1 { return vec![-d / c]; }
     else if degree == 2 {
 		// quadratic
         let discriminant = c.powf(2.0) - (4.0 * b * d);
@@ -89,14 +87,11 @@ fn polynomial (
         // one solution
         let q1 = -c / (2.0 * b);
         if discriminant < EPSILON {
-            return vec![make_point(q1, line, line_vec)];
+            return vec![q1];
         }
         // two solutions
         let q2 = discriminant.sqrt() / (2.0 * b);
-        return vec![
-            make_point(q1 + q2, line, line_vec),
-            make_point(q1 - q2, line, line_vec)
-        ];
+        return vec![q1 + q2, q1 - q2];
     } else if degree == 3 {
 		// cubic
         // Cardano's formula. convert to depressed cubic
@@ -112,7 +107,7 @@ fn polynomial (
             let sqrt_d0 = d0.sqrt();
             let s = cubrt(r + sqrt_d0);
             let t = cubrt(r - sqrt_d0);
-            return vec![make_point(u + s + t, line, line_vec)];
+            return vec![u + s + t];
         }
         // two solutions
         if d0.abs() < EPSILON {
@@ -121,10 +116,7 @@ fn polynomial (
             // instead of checking if S is NaN, check if R was negative
             // if (isNaN(S)) { break; }
             if r < 0.0 { return vec![]; }
-            return vec![
-                make_point(u + 2.0 * s, line, line_vec),
-                make_point(u - s, line, line_vec)
-            ];
+            return vec![u + 2.0 * s, u - s];
         }
         // three solutions
         let sqrt_d0 = (-d0).sqrt();
@@ -133,9 +125,9 @@ fn polynomial (
         let s_r = r_s * phi.cos();
         let s_i = r_s * phi.sin();
         return vec![
-            make_point(u + 2.0 * s_r, line, line_vec),
-            make_point(u - s_r - 3.0_f64.sqrt() * s_i, &line, line_vec),
-            make_point(u - s_r + 3.0_f64.sqrt() * s_i, &line, line_vec)
+            u + 2.0 * s_r,
+            u - s_r - 3.0_f64.sqrt() * s_i,
+            u - s_r + 3.0_f64.sqrt() * s_i
         ];
     }
 	return vec![];
@@ -168,12 +160,19 @@ pub fn axiom6 (
 	let d = c1 * c3 + c5 * c7;
 	// construct the solution from the root, the solution being the parameter
 	// point reflected across the fold line, lying on the parameter line
-    let mut polynomial_degree = 0;
+    let mut polynomial_degree: u8 = 0;
 	if c.abs() > EPSILON { polynomial_degree = 1; }
 	if b.abs() > EPSILON { polynomial_degree = 2; }
 	if a.abs() > EPSILON { polynomial_degree = 3; }
-    let solutions = polynomial(polynomial_degree, a, b, c, d, &l1, &line_vec);
-    return vec![];
+    println!("axiom 6 degree {}", polynomial_degree);
+    return polynomial(polynomial_degree, a, b, c, d)
+        .iter()
+        .map(|n| l1.u.scale(l1.d).add(&line_vec.scale(*n)))
+        .map(|p| Line {
+            u: p.normalize().subtract(p1),
+            d: p.normalize().subtract(p1).dot(&p.midpoint(&p1))
+        })
+        .collect::<Vec<Line>>();
 	// return solutions
 	// 	.map(p => normalize(subtract(p, pointA)))
 	// 	.map((u, i) => ({ u, d: dot(u, midpoint(solutions[i], pointA)) }))

@@ -71,6 +71,15 @@ fn line_tests () {
 	// duplicate test Line { x: -1.0, y: 0.0, d: -0.5 } Line { x: 1.0, y: 0.0, d: 0.5 }
 }
 
+
+const UNIT_SQUARE: Square = Square { 
+    a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+    b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+    c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+    d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+};
+
+
 fn axiom_tests () {
     let unit_square: Square = Square {
         a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
@@ -117,8 +126,65 @@ fn axiom_tests () {
 	// assert_delta!(ax3b.d, 1.0, EPSILON);
 }
 
+fn axiom1 () {
+	let res0 = axioms::axiom1(
+		&Vector { x: 2.0/3.0, y: 1.0/3.0 },
+		&Vector { x: 1.0/3.0, y: 2.0/3.0 });
+	let res1 = axioms::axiom1(
+		&Vector { x: 2.0/3.0, y: 1.0/3.0 },
+		&Vector { x: 1.0/3.0, y: 2.0/3.0 });
+	// let expected = {
+	// 	vector: [-Math.SQRT1_2, Math.SQRT1_2],
+	// 	origin: [2/3, 1/3],
+	// };
+	// expect(ear.math.equivalent(res0.vector, expected.vector)).toBe(true);
+	// expect(ear.math.equivalent(res0.origin, expected.origin)).toBe(true);
+	// expect(ear.math.equivalent(res1.vector, expected.vector)).toBe(true);
+	// expect(ear.math.equivalent(res1.origin, expected.origin)).toBe(true);
+}
+
+fn make_line (vector: &Vector, origin: &Vector) -> Line {
+  let mag = vector.magnitude();
+  let u = vector.rotate90();
+  let d = origin.dot(&u) / mag;
+  return if d < 0.0
+  	{ Line { u: Vector { x: -u.x / mag, y: -u.y / mag }, d: -d } } else
+  	{ Line { u: Vector { x:  u.x / mag, y:  u.y / mag }, d: d } };
+}
+
+fn axiom6 () {
+	let line1 = make_line(&Vector { x: 0.0, y: 1.0 }, &Vector { x: 1.0, y: 0.0 });
+	let line2 = make_line(&Vector { x: 1.0, y: 0.0 }, &Vector { x: 0.0, y: 1.0 });
+	let point1 = Vector { x: 0.75, y: 0.0 };
+	let point2 = Vector { x: 0.0, y: 0.75 };
+	let res = axioms::axiom6(&point1, &point2, &line1, &line2, &UNIT_SQUARE);
+	println!("axiom 6 #res({}): {:?}", res.len(), res);
+
+	// let lines = [{
+	// 	origin: [0.14644660940672627, 0.8535533905932738],
+	// 	vector: [0.9855985596534889, -0.16910197872576277],
+	// },
+	// {
+	// 	origin: [0.8535533905932738, 0.14644660940672635],
+	// 	vector: [0.16910197872576288, -0.9855985596534887],
+	// },
+	// {
+	// 	origin: [0.4999999999999999, 0.4999999999999999],
+	// 	vector: [0.7071067811865475, -0.7071067811865475],
+	// }];
+	// for (let i = 0; i < lines.length; i += 1) {
+	// 	expect(res[i].vector[0]).toBeCloseTo(lines[i].vector[0]);
+	// 	expect(res[i].vector[1]).toBeCloseTo(lines[i].vector[1]);
+	// 	expect(res[i].origin[0]).toBeCloseTo(lines[i].origin[0]);
+	// 	expect(res[i].origin[1]).toBeCloseTo(lines[i].origin[1]);
+	// }
+
+}
+
 pub fn run_tests () {
 	vector_tests();
 	axiom_tests();
 	line_tests();
+    axiom1();
+	axiom6();
 }

@@ -53,12 +53,25 @@ impl QuadTree {
 			}
 		}
 	}
-	pub fn flatten (&self) -> Vec<(Vector, u64)> {
-		let mut list: Vec<(Vector, u64)> = Vec::new();
+	pub fn flatten (&self) -> Vec<&(Vector, u64)> {
+		let mut list: Vec<&(Vector, u64)> = Vec::new();
 		for i in 0..self.buckets.len() {
 			for j in 0..self.buckets[i].len() {
 				for k in 0..self.buckets[i][j].len() {
-					list.push(self.buckets[i][j][k]);
+					list.push(&self.buckets[i][j][k]);
+				}
+			}
+		}
+		return list;
+	}
+    pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
+		let mut list: Vec<&(Vector, u64)> = Vec::new();
+		for i in 0..self.buckets.len() {
+			for j in 0..self.buckets[i].len() {
+				for k in 0..self.buckets[i][j].len() {
+                    if self.buckets[i][j][k].1 >= count {
+					    list.push(&self.buckets[i][j][k]);
+                    }
 				}
 			}
 		}

@@ -4,41 +4,28 @@ use Segment;
 
 const EPSILON: f64 = 1.0e-8;
 
-#[derive(Copy, Clone)]
+// broadly, this "Square" is actually an axis-aligned polygon. can be any rect.
+#[derive(Clone)]
 pub struct Square {
-	pub a: Line,
-	pub b: Line,
-	pub c: Line,
-	pub d: Line
+	pub sides: Vec<Line>
 }
 
-// todo: this is currently hard-coded to a unit square
 impl Square {
+	// todo: this is currently hard-coded to a unit square
 	pub fn contains (&self, p: &Vector) -> bool {
 		p.x >= 0.0 && p.x <= 1.0 &&
 		p.y >= 0.0 && p.y <= 1.0
 	}
 	pub fn clip (&self, l: &Line) -> (bool, Segment) {
-		let mut intersects: [(bool, Vector); 4] = [
-			self.a.intersect(&l),
-			self.b.intersect(&l),
-			self.c.intersect(&l),
-			self.d.intersect(&l)
-		];
-		for i in 0..intersects.len() {
-			intersects[i].0 = intersects[i].0 && self.contains(&intersects[i].1);
-		}
-		// filter out results
-		let mut results: Vec<Vector> = Vec::new();
-		for i in 0..intersects.len() {
-			if intersects[i].0 {
-				// results.push(intersects[i].1);
-				results.push(Vector {
-					x: intersects[i].1.x,
-					y: intersects[i].1.y
-				});
-			}
-		}
+		// intersect line with every side, include inside the tuple
+		// whether the intersection point is inside the polygon
+		let results: Vec<(Vector)> = self.sides.iter()
+			.map(|line| line.intersect(&l))
+			.map(|el| (el.0, self.contains(&el.1), el.1))
+			.filter(|el| el.0 && el.1)
+			.map(|el| el.2)
+			.collect();
+
 		if results.len() < 2 {
 			return (false,
 				Segment {a:Vector {x:0.0, y:0.0}, b:Vector {x:0.0, y:0.0}});
@@ -46,20 +33,11 @@ impl Square {
 		// sort along line
 		let origin = l.u.scale(l.d);
 		let vector = l.u.rotate90();
-		let mut ts: Vec<f64> = Vec::new();
-		for i in 0..results.len() {
-			ts.push(results[i].subtract(&origin).dot(&vector));
-		}
-		let mut smallest = ts[0];
-		let mut largest = ts[0];
-		for i in 1..ts.len() {
-			if ts[i] < smallest { smallest = ts[i] }
-			if ts[i] > largest { largest = ts[i] }
-		}
-		if (smallest - largest).abs() < EPSILON {
-			return (false,
-				Segment {a:Vector {x:0.0, y:0.0}, b:Vector {x:0.0, y:0.0}});
-		}
+		let ts: Vec<f64> = results.iter()
+			.map(|pt| pt.subtract(&origin).dot(&vector))
+			.collect();
+		let smallest = *ts.iter().fold(&ts[0], |a, b| if b < a {b} else {a});
+		let largest = *ts.iter().fold(&ts[0], |a, b| if b > a {b} else {a});
 		return (true, Segment {
 			a: origin.add(&vector.scale(smallest)),
 			b: origin.add(&vector.scale(largest))

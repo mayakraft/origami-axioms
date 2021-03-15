@@ -64,19 +64,17 @@ impl LineContainer {
 		}
 		return list;
 	}
-	// pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
-	// 	let mut list: Vec<&(Vector, u64)> = Vec::new();
-	// 	for i in 0..self.buckets.len() {
-	// 		for j in 0..self.buckets[i].len() {
-	// 			for k in 0..self.buckets[i][j].len() {
-	// 				if self.buckets[i][j][k].1 >= count {
-	// 					list.push(&self.buckets[i][j][k]);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// 	return list;
-	// }
+	pub fn flatten_filter (&self, count: u64) -> Vec<(Line, u64)> {
+		let mut list: Vec<(Line, u64)> = Vec::new();
+		for i in 0..self.buckets.len() {
+			for j in 0..self.buckets[i].len() {
+				if self.buckets[i][j].1 >= count {
+					list.push(self.buckets[i][j]);
+				}
+			}
+		}
+		return list;
+	}
 	pub fn len (&self) -> usize {
 		let mut count: usize = 0;
 		for i in 0..self.buckets.len() {

@@ -72,20 +72,23 @@ fn line_tests () {
 }
 
 
-const UNIT_SQUARE: Square = Square { 
-	a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-	b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-	c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-	d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
-};
-
+// const UNIT_SQUARE: Square = Square {
+// 	sides: vec![
+// 		Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+// 		Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+// 		Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+// 		Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+// 	]
+// };
 
 fn axiom_tests () {
 	let unit_square: Square = Square {
-		a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-		b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-		c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-		d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+		sides: vec![
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+		]
 	};
 
 	let t: Vector = Vector { x: 1.01, y: 0.0 };
@@ -153,11 +156,20 @@ fn make_line (vector: &Vector, origin: &Vector) -> Line {
 }
 
 fn axiom5 () {
+	let unit_square: Square = Square {
+		sides: vec![
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+		]
+	};
+
 	let line1 = make_line(&Vector { x: 1.0, y: 1.0 }, &Vector { x: 0.0, y: 0.0 });
 	println!("axiom 5 #line input {:?}", line1);
 	let point1 = Vector { x: 0.1, y: 0.0 };
 	let point2 = Vector { x: 0.9, y: 0.1 };
-	let res = axioms::axiom5(&point1, &point2, &line1, &UNIT_SQUARE);
+	let res = axioms::axiom5(&point1, &point2, &line1, &unit_square);
 	println!("axiom 5 #res({}): {:?}", res.len(), res);
 
 	// let lines = [{
@@ -181,11 +193,20 @@ fn axiom5 () {
 }
 
 fn axiom6 () {
+	let unit_square: Square = Square {
+		sides: vec![
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+		]
+	};
+
 	let line1 = make_line(&Vector { x: 0.0, y: 1.0 }, &Vector { x: 1.0, y: 0.0 });
 	let line2 = make_line(&Vector { x: 1.0, y: 0.0 }, &Vector { x: 0.0, y: 1.0 });
 	let point1 = Vector { x: 0.75, y: 0.0 };
 	let point2 = Vector { x: 0.0, y: 0.75 };
-	let res = axioms::axiom6(&point1, &point2, &line1, &line2, &UNIT_SQUARE);
+	let res = axioms::axiom6(&point1, &point2, &line1, &line2, &unit_square);
 	println!("axiom 6 #res({}): {:?}", res.len(), res);
 
 	// let lines = [{

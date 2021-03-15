@@ -30,6 +30,9 @@ fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
 		let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.3);
+		// let mut opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.15);
+		// if opacity > 1.0 { opacity = 1.0 }
+		// opacity *= 0.1;
 		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence);
 		string.push_str(&format!("<line stroke-opacity=\"{}\" ", opacity));
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
@@ -54,8 +57,8 @@ fn write(string: &String) -> std::io::Result<()> {
 
 pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&Vector>) {
 	let mut svg: String = String::new();
-	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"1600px\" height=\"1600px\">\n");
-	svg.push_str("<g fill=\"none\" stroke=\"white\" stroke-width=\"0.0005\">\n");
+	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"2000px\" height=\"2000px\">\n");
+	svg.push_str("<g fill=\"none\" stroke=\"white\" stroke-width=\"0.0002\">\n");
 	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
 	svg.push_str(&svg_lines(&segments));
 	// boundary

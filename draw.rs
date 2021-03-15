@@ -10,7 +10,7 @@ fn svg_points (points: &Vec<&Vector>) -> String {
 		string.push_str("<circle ");
 		string.push_str(&format!("cx=\"{}\" ", points[i].x));
 		string.push_str(&format!("cy=\"{}\" ", points[i].y));
-		string.push_str(&format!("r=\"{}\" ", 0.0005));
+		string.push_str(&format!("r=\"{}\" ", 0.002));
 		string.push_str("/>\n");
 		strings.push(string);
 	}
@@ -23,11 +23,15 @@ fn svg_points (points: &Vec<&Vector>) -> String {
 
 fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
+	let mut max_occurrence: f64 = 0.0;
+	for i in 0..segments.len() {
+		if segments[i].1 as f64 > max_occurrence { max_occurrence = segments[i].1 as f64; }
+	}
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
-        // let opacity: f64 = ((segments[i].1 as f64) / 5.0).powf(0.3);
-        let opacity: f64 = ((segments[i].1 as f64) / 5000.0);
-		string.push_str(&format!("<line opacity=\"{}\" ", opacity));
+		let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.3);
+		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence);
+		string.push_str(&format!("<line stroke-opacity=\"{}\" ", opacity));
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));
 		string.push_str(&format!("x2=\"{}\" ", segments[i].0.b.x));
@@ -50,14 +54,20 @@ fn write(string: &String) -> std::io::Result<()> {
 
 pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&Vector>) {
 	let mut svg: String = String::new();
-	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.02 -0.02 1.04 1.04\" width=\"600px\" height=\"600px\">\n");
-	svg.push_str("<g fill=\"none\" stroke=\"black\" stroke-width=\"0.0005\">\n");
-	// svg.push_str("<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" />\n");
+	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"1600px\" height=\"1600px\">\n");
+	svg.push_str("<g fill=\"none\" stroke=\"white\" stroke-width=\"0.0005\">\n");
+	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
 	svg.push_str(&svg_lines(&segments));
+	// boundary
+	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" />\n");
+	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"1\" y1=\"0\" x2=\"1\" y2=\"1\" />\n");
+	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"1\" y1=\"1\" x2=\"0\" y2=\"1\" />\n");
+	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"0\" y1=\"1\" x2=\"0\" y2=\"0\" />\n");
+
 	svg.push_str("</g>\n");
-	svg.push_str("<g fill=\"#e53\" stroke=\"none\">\n");
-	svg.push_str(&svg_points(points));
-	svg.push_str("</g>\n");
+	// svg.push_str("<g fill=\"#e53\" stroke=\"none\">\n");
+	// svg.push_str(&svg_points(points));
+	// svg.push_str("</g>\n");
 	svg.push_str("</svg>\n");
 	let _res = write(&svg);
 }

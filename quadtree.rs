@@ -34,7 +34,7 @@ impl QuadTree {
 		let idx = point_to_index(point);
 		self.buckets[idx.0][idx.1].push((*point, 1));
 	}
-    // return true if match found. false if no match
+	// return true if match found. false if no match
 	pub fn increment_match (&mut self, point: &Vector) -> bool {
 		let idx = point_to_index(point);
 		let bucket = &mut self.buckets[idx.0][idx.1];
@@ -64,20 +64,20 @@ impl QuadTree {
 		}
 		return list;
 	}
-    pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
+	pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
 		let mut list: Vec<&(Vector, u64)> = Vec::new();
 		for i in 0..self.buckets.len() {
 			for j in 0..self.buckets[i].len() {
 				for k in 0..self.buckets[i][j].len() {
-                    if self.buckets[i][j][k].1 >= count {
-					    list.push(&self.buckets[i][j][k]);
-                    }
+					if self.buckets[i][j][k].1 >= count {
+						list.push(&self.buckets[i][j][k]);
+					}
 				}
 			}
 		}
 		return list;
 	}
-    // pub fn flatten (&self) -> Vec<&Vector> {
+	// pub fn flatten (&self) -> Vec<&Vector> {
 		// let mut list: Vec<&Vector> = Vec::new();
 		// for i in 0..self.buckets.len() {
 			// for j in 0..self.buckets[i].len() {
@@ -97,18 +97,18 @@ impl QuadTree {
 		}
 		return count;
 	}
-    pub fn filter_by_count (&self, count: u64) -> QuadTree {
-        let mut tree: QuadTree = make_tree();
+	pub fn filter_by_count (&self, count: u64) -> QuadTree {
+		let mut tree: QuadTree = make_tree();
 		for i in 0..self.buckets.len() {
 			for j in 0..self.buckets[i].len() {
 				for k in 0..self.buckets[i][j].len() {
-                    if self.buckets[i][j][k].1 >= count {
-                        tree.buckets[i][j].push(self.buckets[i][j][k]);
-                    }
+					if self.buckets[i][j][k].1 >= count {
+						tree.buckets[i][j].push(self.buckets[i][j][k]);
+					}
 				}
 			}
 		}
-        return tree;
-    }
+		return tree;
+	}
 }
 

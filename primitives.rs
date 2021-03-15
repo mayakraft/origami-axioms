@@ -1,4 +1,5 @@
 use std::fmt;
+// use std::iter::FromIterator;
 
 const EPSILON: f64 = 1.0e-8;
 
@@ -52,9 +53,9 @@ impl Vector {
 	pub fn is_parallel (&self, u: &Vector) -> bool {
 		(1.0 - self.normalize().dot(&u.normalize()).abs()) < EPSILON
 	}
-    // pub fn midpoint (&self, u: &Vector) -> Vector {
-    //     self.add(u).scale(0.5)
-    // }
+	// pub fn midpoint (&self, u: &Vector) -> Vector {
+	//     self.add(u).scale(0.5)
+	// }
 	pub fn midpoint (&self, u: &Vector) -> Vector {
 		Vector { x: (self.x + u.x) / 2.0, y: (self.y + u.y) / 2.0 }
 	}

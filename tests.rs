@@ -73,26 +73,26 @@ fn line_tests () {
 
 
 const UNIT_SQUARE: Square = Square { 
-    a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-    b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-    c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-    d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+	a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+	b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+	c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+	d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
 };
 
 
 fn axiom_tests () {
-    let unit_square: Square = Square {
-        a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-        b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-        c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-        d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
-    };
+	let unit_square: Square = Square {
+		a: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+		b: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+		c: Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+		d: Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+	};
 
 	let t: Vector = Vector { x: 1.01, y: 0.0 };
 	let o: Vector = Vector { x: 0.0, y: 0.0 };
 	let u: Vector = Vector { x: 2.0, y: 2.0 };
 	let v: Vector = Vector { x: 1.2, y: -0.8 };
-    let w: Vector = Vector { x: 6.0, y: 13.0 }.normalize();
+	let w: Vector = Vector { x: 6.0, y: 13.0 }.normalize();
 	let l: Line = Line { u: Vector { x: 1.0, y: 0.0 }, d: 1.0 };
 	let m: Line = Line { u: Vector { x: 0.0, y: 1.0 }, d: 1.0 };
 	let n: Line = Line { u: Vector { x: 0.0, y: 1.0 }, d: 3.0 };
@@ -106,12 +106,12 @@ fn axiom_tests () {
 	let ax5 = axioms::axiom5(&t, &o, &s, &unit_square);
 	let ax6 = axioms::axiom6(&t, &o, &s, &r, &unit_square);
 	let ax7 = axioms::axiom7(&o, &r, &l, &unit_square);
-    println!("{:?}", ax3a);
-    println!("{:?}", ax3b);
-    println!("axiom 4 {:?}", ax4);
-    println!("axiom 5 {:?}", ax5);
-    println!("axiom 6 {:?}", ax6);
-    println!("axiom 7 {:?}", ax7);
+	println!("{:?}", ax3a);
+	println!("{:?}", ax3b);
+	println!("axiom 4 {:?}", ax4);
+	println!("axiom 5 {:?}", ax5);
+	println!("axiom 6 {:?}", ax6);
+	println!("axiom 7 {:?}", ax7);
 	assert_delta!(ax1.u.x, 0.9615239476408233, EPSILON);
 	assert_delta!(ax1.u.y, -0.2747211278973781, EPSILON);
 	assert_delta!(ax1.d, 1.3736056394868903, EPSILON);
@@ -144,12 +144,40 @@ fn axiom1 () {
 }
 
 fn make_line (vector: &Vector, origin: &Vector) -> Line {
-  let mag = vector.magnitude();
-  let u = vector.rotate90();
-  let d = origin.dot(&u) / mag;
+  // let mag = vector.magnitude();
+  let u = vector.normalize().rotate90();
+  let d = origin.dot(&u); // / mag;
   return if d < 0.0
-  	{ Line { u: Vector { x: -u.x / mag, y: -u.y / mag }, d: -d } } else
-  	{ Line { u: Vector { x:  u.x / mag, y:  u.y / mag }, d: d } };
+	{ Line { u: Vector { x: -u.x, y: -u.y }, d: -d } } else
+	{ Line { u: Vector { x:  u.x, y:  u.y }, d: d } };
+}
+
+fn axiom5 () {
+	let line1 = make_line(&Vector { x: 1.0, y: 1.0 }, &Vector { x: 0.0, y: 0.0 });
+	println!("axiom 5 #line input {:?}", line1);
+	let point1 = Vector { x: 0.1, y: 0.0 };
+	let point2 = Vector { x: 0.9, y: 0.1 };
+	let res = axioms::axiom5(&point1, &point2, &line1, &UNIT_SQUARE);
+	println!("axiom 5 #res({}): {:?}", res.len(), res);
+
+	// let lines = [{
+	// 	origin: [0.14644660940672627, 0.8535533905932738],
+	// 	vector: [0.9855985596534889, -0.16910197872576277],
+	// },
+	// {
+	// 	origin: [0.8535533905932738, 0.14644660940672635],
+	// 	vector: [0.16910197872576288, -0.9855985596534887],
+	// },
+	// {
+	// 	origin: [0.4999999999999999, 0.4999999999999999],
+	// 	vector: [0.7071067811865475, -0.7071067811865475],
+	// }];
+	// for (let i = 0; i < lines.length; i += 1) {
+	// 	expect(res[i].vector[0]).toBeCloseTo(lines[i].vector[0]);
+	// 	expect(res[i].vector[1]).toBeCloseTo(lines[i].vector[1]);
+	// 	expect(res[i].origin[0]).toBeCloseTo(lines[i].origin[0]);
+	// 	expect(res[i].origin[1]).toBeCloseTo(lines[i].origin[1]);
+	// }
 }
 
 fn axiom6 () {
@@ -185,6 +213,7 @@ pub fn run_tests () {
 	vector_tests();
 	axiom_tests();
 	line_tests();
-    axiom1();
+	axiom1();
+	axiom5();
 	axiom6();
 }

@@ -9,7 +9,8 @@ pub struct LineContainer {
 
 fn point_to_index (line: &Line) -> usize {
 	let mut i: usize = (line.d.abs() /2_f64.sqrt() * BUCKET_F).floor() as usize;
-	if i == BUCKET { i = 9999 }
+	// println!("p_2_ln {} {}", i, line.d);
+	if i >= BUCKET { i = 9999 }
 	return i;
 }
 
@@ -37,7 +38,7 @@ impl LineContainer {
 		let idx = point_to_index(line);
 		self.buckets[idx].push((*line, 1));
 	}
-    // return true if match found. false if no match
+	// return true if match found. false if no match
 	pub fn increment_match (&mut self, line: &Line) -> bool {
 		let idx = point_to_index(line);
 		let bucket = &mut self.buckets[idx];
@@ -54,47 +55,47 @@ impl LineContainer {
 			self.buckets[i].append(&mut t.buckets[i]);
 		}
 	}
-	pub fn flatten (&self) -> Vec<&(Line, u64)> {
-		let mut list: Vec<&(Line, u64)> = Vec::new();
+	pub fn flatten (&self) -> Vec<(Line, u64)> {
+		let mut list: Vec<(Line, u64)> = Vec::new();
 		for i in 0..self.buckets.len() {
-            for j in 0..self.buckets[i].len() {
-                list.push(&self.buckets[i][j]);
-            }
+			for j in 0..self.buckets[i].len() {
+				list.push(self.buckets[i][j]);
+			}
 		}
 		return list;
 	}
-    // pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
-		// let mut list: Vec<&(Vector, u64)> = Vec::new();
-		// for i in 0..self.buckets.len() {
-			// for j in 0..self.buckets[i].len() {
-				// for k in 0..self.buckets[i][j].len() {
-    //                 if self.buckets[i][j][k].1 >= count {
-					    // list.push(&self.buckets[i][j][k]);
-    //                 }
-				// }
-			// }
-		// }
-		// return list;
+	// pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
+	// 	let mut list: Vec<&(Vector, u64)> = Vec::new();
+	// 	for i in 0..self.buckets.len() {
+	// 		for j in 0..self.buckets[i].len() {
+	// 			for k in 0..self.buckets[i][j].len() {
+	// 				if self.buckets[i][j][k].1 >= count {
+	// 					list.push(&self.buckets[i][j][k]);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return list;
 	// }
 	pub fn len (&self) -> usize {
 		let mut count: usize = 0;
 		for i in 0..self.buckets.len() {
-            count += self.buckets[i].len();
-        }
+			count += self.buckets[i].len();
+		}
 		return count;
 	}
-    // pub fn filter_by_count (&self, count: u64) -> QuadTree {
-    //     let mut tree: QuadTree = make_tree();
-		// for i in 0..self.buckets.len() {
-			// for j in 0..self.buckets[i].len() {
-				// for k in 0..self.buckets[i][j].len() {
-    //                 if self.buckets[i][j][k].1 >= count {
-    //                     tree.buckets[i][j].push(self.buckets[i][j][k]);
-    //                 }
-				// }
-			// }
-		// }
-    //     return tree;
-    // }
+	// pub fn filter_by_count (&self, count: u64) -> QuadTree {
+	// 	let mut tree: QuadTree = make_tree();
+	// 	for i in 0..self.buckets.len() {
+	// 		for j in 0..self.buckets[i].len() {
+	// 			for k in 0..self.buckets[i][j].len() {
+	// 				if self.buckets[i][j][k].1 >= count {
+	// 					tree.buckets[i][j].push(self.buckets[i][j][k]);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return tree;
+	// }
 }
 

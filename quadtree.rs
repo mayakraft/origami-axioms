@@ -77,17 +77,6 @@ impl QuadTree {
 		}
 		return list;
 	}
-	// pub fn flatten (&self) -> Vec<&Vector> {
-		// let mut list: Vec<&Vector> = Vec::new();
-		// for i in 0..self.buckets.len() {
-			// for j in 0..self.buckets[i].len() {
-				// for k in 0..self.buckets[i][j].len() {
-					// list.push(&self.buckets[i][j][k].0);
-				// }
-			// }
-		// }
-		// return list;
-	// }
 	pub fn len (&self) -> usize {
 		let mut count: usize = 0;
 		for i in 0..self.buckets.len() {
@@ -111,4 +100,3 @@ impl QuadTree {
 		return tree;
 	}
 }
-

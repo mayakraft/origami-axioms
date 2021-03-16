@@ -1,7 +1,8 @@
 use Vector;
 use Line;
 use axioms;
-use Square;
+use Rect;
+use make_square;
 
 const EPSILON: f64 = f64::EPSILON * 10.0;
 
@@ -82,14 +83,7 @@ fn line_tests () {
 // };
 
 fn axiom_tests () {
-	let unit_square: Square = Square {
-		sides: vec![
-			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
-		]
-	};
+	let unit_square: Rect = make_square();
 
 	let t: Vector = Vector { x: 1.01, y: 0.0 };
 	let o: Vector = Vector { x: 0.0, y: 0.0 };
@@ -98,42 +92,42 @@ fn axiom_tests () {
 	let w: Vector = Vector { x: 6.0, y: 13.0 }.normalize();
 	let l: Line = Line { u: Vector { x: 1.0, y: 0.0 }, d: 1.0 };
 	let m: Line = Line { u: Vector { x: 0.0, y: 1.0 }, d: 1.0 };
-	let n: Line = Line { u: Vector { x: 0.0, y: 1.0 }, d: 3.0 };
+	let n: Line = Line { u: Vector { x: 0.0, y: 1.0 }, d: 0.5 };
 	let r: Line = Line { u: w, d: 3.0 };
 	let s: Line = Line { u: Vector { x: 1.0, y: 0.0 }, d: 2.0 };
 	let ax1 = axioms::axiom1(&u, &v);
 	let ax2 = axioms::axiom2(&u, &v);
-	let ax3a = axioms::axiom3(&l, &m, &unit_square);
+	let _ax3a = axioms::axiom3(&l, &m, &unit_square);
 	let ax3b = axioms::axiom3(&m, &n, &unit_square);
-	let ax4 = axioms::axiom4(&v, &r, &unit_square);
-	let ax5 = axioms::axiom5(&t, &o, &s, &unit_square);
-	let ax6 = axioms::axiom6(&t, &o, &s, &r, &unit_square);
-	let ax7 = axioms::axiom7(&o, &r, &l, &unit_square);
-	println!("{:?}", ax3a);
-	println!("{:?}", ax3b);
-	println!("axiom 4 {:?}", ax4);
-	println!("axiom 5 {:?}", ax5);
-	println!("axiom 6 {:?}", ax6);
-	println!("axiom 7 {:?}", ax7);
+	let _ax4 = axioms::axiom4(&v, &r, &unit_square);
+	let _ax5 = axioms::axiom5(&t, &o, &s, &unit_square);
+	let _ax6 = axioms::axiom6(&t, &o, &s, &r, &unit_square);
+	let _ax7 = axioms::axiom7(&o, &r, &l, &unit_square);
+	// assert_eq!(ax3a.len(), 1);
+	// assert_delta!(ax3a[0].u.x, 0.7071067811865475, EPSILON);
+	// assert_delta!(ax3a[0].u.y, -0.7071067811865475, EPSILON);
+	// assert_delta!(ax3a[0].d, 0.0, EPSILON);
 	assert_delta!(ax1.u.x, 0.9615239476408233, EPSILON);
 	assert_delta!(ax1.u.y, -0.2747211278973781, EPSILON);
 	assert_delta!(ax1.d, 1.3736056394868903, EPSILON);
 	assert_delta!(ax2.u.x, -0.2747211278973781, EPSILON);
 	assert_delta!(ax2.u.y, -0.9615239476408233, EPSILON);
 	assert_delta!(ax2.d, -1.016468173220299, EPSILON);
-	// assert_delta!(ax3a.u.x, 1.0, EPSILON);
-	// assert_delta!(ax3a.u.y, 0.0, EPSILON);
-	// assert_delta!(ax3a.d, 1.0, EPSILON);
-	// assert_delta!(ax3b.u.x, 0.0, EPSILON);
-	// assert_delta!(ax3b.u.y, 1.0, EPSILON);
-	// assert_delta!(ax3b.d, 1.0, EPSILON);
+	assert_eq!(ax3b.len(), 1);
+	assert_delta!(ax3b[0].u.x, 0.0, EPSILON);
+	assert_delta!(ax3b[0].u.y, 1.0, EPSILON);
+	assert_delta!(ax3b[0].d, 0.75, EPSILON);
+	// println!("axiom 4 {:?}", ax4);
+	// println!("axiom 5 {:?}", ax5);
+	// println!("axiom 6 {:?}", ax6);
+	// println!("axiom 7 {:?}", ax7);
 }
 
 fn axiom1 () {
-	let res0 = axioms::axiom1(
+	let _res0 = axioms::axiom1(
 		&Vector { x: 2.0/3.0, y: 1.0/3.0 },
 		&Vector { x: 1.0/3.0, y: 2.0/3.0 });
-	let res1 = axioms::axiom1(
+	let _res1 = axioms::axiom1(
 		&Vector { x: 2.0/3.0, y: 1.0/3.0 },
 		&Vector { x: 1.0/3.0, y: 2.0/3.0 });
 	// let expected = {
@@ -156,21 +150,15 @@ fn make_line (vector: &Vector, origin: &Vector) -> Line {
 }
 
 fn axiom5 () {
-	let unit_square: Square = Square {
-		sides: vec![
-			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
-		]
-	};
+	let unit_square: Rect = make_square();
 
 	let line1 = make_line(&Vector { x: 1.0, y: 1.0 }, &Vector { x: 0.0, y: 0.0 });
-	println!("axiom 5 #line input {:?}", line1);
 	let point1 = Vector { x: 0.1, y: 0.0 };
 	let point2 = Vector { x: 0.9, y: 0.1 };
-	let res = axioms::axiom5(&point1, &point2, &line1, &unit_square);
-	println!("axiom 5 #res({}): {:?}", res.len(), res);
+	let _res = axioms::axiom5(&point1, &point2, &line1, &unit_square);
+
+	// println!("axiom 5 #line input {:?}", line1);
+	// println!("axiom 5 #res({}): {:?}", res.len(), res);
 
 	// let lines = [{
 	// 	origin: [0.14644660940672627, 0.8535533905932738],
@@ -193,21 +181,15 @@ fn axiom5 () {
 }
 
 fn axiom6 () {
-	let unit_square: Square = Square {
-		sides: vec![
-			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
-			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
-			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
-			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
-		]
-	};
+	let unit_square: Rect = make_square();
 
 	let line1 = make_line(&Vector { x: 0.0, y: 1.0 }, &Vector { x: 1.0, y: 0.0 });
 	let line2 = make_line(&Vector { x: 1.0, y: 0.0 }, &Vector { x: 0.0, y: 1.0 });
 	let point1 = Vector { x: 0.75, y: 0.0 };
 	let point2 = Vector { x: 0.0, y: 0.75 };
-	let res = axioms::axiom6(&point1, &point2, &line1, &line2, &unit_square);
-	println!("axiom 6 #res({}): {:?}", res.len(), res);
+	let _res = axioms::axiom6(&point1, &point2, &line1, &line2, &unit_square);
+
+	// println!("axiom 6 #res({}): {:?}", res.len(), res);
 
 	// let lines = [{
 	// 	origin: [0.14644660940672627, 0.8535533905932738],

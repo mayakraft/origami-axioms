@@ -55,7 +55,7 @@ fn write(string: &String) -> std::io::Result<()> {
 	Ok(())
 }
 
-pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&Vector>) {
+pub fn draw (segments: &Vec<(Segment, u64)>, _points: &Vec<&Vector>) {
 	let mut svg: String = String::new();
 	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"2000px\" height=\"2000px\">\n");
 	svg.push_str("<g fill=\"none\" stroke=\"white\" stroke-width=\"0.0002\">\n");

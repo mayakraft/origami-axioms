@@ -21,6 +21,26 @@ pub struct Segment {
 	pub b: Vector
 }
 
+#[derive(Clone)]
+pub struct Rect {
+	pub sides: Vec<Line>
+}
+
+// prefer to use this constructor when making a rect, or at least,
+// it's very important that the "sides" are Lines with normals
+// that point outwards. needed for the "contains" method.
+pub fn make_square () -> Rect {
+	Rect {
+		sides: vec![
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 0.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 1.0 },
+			Line { u: Vector { x: 0.0 , y: 1.0 }, d: 1.0 },
+			Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
+		]
+	}
+}
+
+
 impl Vector {
 	pub fn magnitude (&self) -> f64 { (self.x * self.x + self.y * self.y).sqrt() }
 	pub fn magnitude_squared (&self) -> f64 { self.x * self.x + self.y * self.y }
@@ -45,34 +65,29 @@ impl Vector {
 	pub fn rotate270 (&self) -> Vector { Vector { x: self.y, y: -self.x } }
 	pub fn is_degenerate (&self) -> bool { (self.x.abs() + self.y.abs()) < EPSILON }
 	pub fn equivalent (&self, u: &Vector) -> bool {
-		self.x - u.x < EPSILON &&
-		self.x - u.x > -EPSILON &&
-		self.y - u.y < EPSILON &&
-		self.y - u.y > -EPSILON
+		self.x - u.x < EPSILON && self.x - u.x > -EPSILON &&
+		self.y - u.y < EPSILON && self.y - u.y > -EPSILON
 	}
 	pub fn is_parallel (&self, u: &Vector) -> bool {
 		(1.0 - self.normalize().dot(&u.normalize()).abs()) < EPSILON
 	}
-	// pub fn midpoint (&self, u: &Vector) -> Vector {
-	//     self.add(u).scale(0.5)
-	// }
 	pub fn midpoint (&self, u: &Vector) -> Vector {
 		Vector { x: (self.x + u.x) / 2.0, y: (self.y + u.y) / 2.0 }
+	}
+	pub fn distance_to (&self, u: &Vector) -> f64 {
+		Vector { x: self.x - u.x, y: self.y - u.y }.magnitude()
 	}
 	// fn lerp (&self, u: &Vector, t: f64) -> Vector {
 	// 	let s = 1.0 - t;
 	// 	return Vector { x: self.x * s + u.x * t, y: self.y * s + u.y * t };
 	// }
-	pub fn distance_to (&self, u: &Vector) -> f64 {
-		Vector { x: self.x - u.x, y: self.y - u.y }.magnitude()
-	}
 }
 
 impl Line {
 	pub fn intersect (&self, l: &Line) -> (bool, Vector) {
 		let det = self.u.determinant(&l.u);
 		if det.abs() < EPSILON {
-			return (false, Vector { x: 0.0, y: 0.0 })
+			return (false, Vector { x: 0.0, y: 0.0 });
 		}
 		let x = self.d * &l.u.y - l.d * self.u.y;
 		let y = l.d * self.u.x - self.d * &l.u.x;
@@ -86,26 +101,40 @@ impl Line {
 		// this allows (1,0) and (-1,0) to be treated the same
 		((self.d - l.d * self.u.dot(&l.u)).abs() < EPSILON)
 	}
-// 	fn bisect_lines2 (&self, &l: Line) -> (Line, Line) {
-// 		const determinant = cross2(vectorA, vectorB);
-// 		const dotProd = dot(vectorA, vectorB);
-// 		const bisects = determinant > -epsilon
-// 			? [counter_clockwise_bisect2(vectorA, vectorB)]
-// 			: [clockwise_bisect2(vectorA, vectorB)];
-// 		bisects[1] = determinant > -epsilon
-// 			? rotate90(bisects[0])
-// 			: rotate270(bisects[0]);
-// 		const numerator = (originB[0] - originA[0]) * vectorB[1] - vectorB[0] * (originB[1] - originA[1]);
-// 		const t = numerator / determinant;
-// 		const normalized = [vectorA, vectorB].map(vec => normalize(vec));
-// 		const isParallel = Math.abs(cross2(...normalized)) < epsilon;
-// 		const origin = isParallel
-// 			? midpoint(originA, originB)
-// 			: [originA[0] + vectorA[0] * t, originA[1] + vectorA[1] * t];
-// 		const solution = bisects.map(vector => ({ vector, origin }));
-// 		if (isParallel) { delete solution[(dotProd > -epsilon ? 1 : 0)]; }
-// 		return solution;
-// 	}
+}
+
+impl Rect {
+	// todo: this is currently hard-coded to a unit square
+	pub fn contains (&self, p: &Vector) -> bool {
+		p.x >= 0.0 && p.x <= 1.0 &&
+		p.y >= 0.0 && p.y <= 1.0
+	}
+	pub fn clip (&self, l: &Line) -> (bool, Segment) {
+		// intersect line with every side, include inside the tuple
+		// whether the intersection point is inside the polygon
+		let results: Vec<Vector> = self.sides.iter()
+			.map(|line| line.intersect(&l))
+			.map(|el| (el.0, self.contains(&el.1), el.1))
+			.filter(|el| el.0 && el.1)
+			.map(|el| el.2)
+			.collect();
+		if results.len() < 2 {
+			return (false,
+				Segment {a:Vector {x:0.0, y:0.0}, b:Vector {x:0.0, y:0.0}});
+		}
+		// sort along line
+		let origin = l.u.scale(l.d);
+		let vector = l.u.rotate90();
+		let ts: Vec<f64> = results.iter()
+			.map(|pt| pt.subtract(&origin).dot(&vector))
+			.collect();
+		let smallest = *ts.iter().fold(&ts[0], |a, b| if b < a {b} else {a});
+		let largest = *ts.iter().fold(&ts[0], |a, b| if b > a {b} else {a});
+		return (true, Segment {
+			a: origin.add(&vector.scale(smallest)),
+			b: origin.add(&vector.scale(largest))
+		});
+	}
 }
 
 impl fmt::Debug for Vector {
@@ -116,7 +145,6 @@ impl fmt::Debug for Vector {
 			.finish()
 	}
 }
-
 
 impl fmt::Debug for Line {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

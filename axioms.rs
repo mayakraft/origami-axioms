@@ -1,6 +1,9 @@
+// this source includes a cubic solver
+// ported from Robert Lang's Reference Finder
+// http://langorigami.com
 use Vector;
 use Line;
-use Square;
+use Rect;
 
 const EPSILON: f64 = 1.0e-8;
 
@@ -16,7 +19,7 @@ pub fn axiom2 (a: &Vector, b: &Vector) -> Line {
 	return Line { u: u, d: d };
 }
 
-pub fn axiom3 (a: &Line, b: &Line, boundary: &Square) -> Vec<Line> {
+pub fn axiom3 (a: &Line, b: &Line, _boundary: &Rect) -> Vec<Line> {
 	// get intersection and a test if they are parallel
 	let intersect = a.intersect(&b);
 	// if lines are parallel only one solution exists
@@ -34,7 +37,7 @@ pub fn axiom3 (a: &Line, b: &Line, boundary: &Square) -> Vec<Line> {
 	return solutions;
 }
 
-pub fn axiom4 (a: &Vector, b: &Line, boundary: &Square) -> Vec<Line> {
+pub fn axiom4 (a: &Vector, b: &Line, boundary: &Rect) -> Vec<Line> {
 	let u = b.u.rotate90();
 	let d = a.dot(&u);
 	// test the line before we return it
@@ -49,7 +52,7 @@ pub fn axiom4 (a: &Vector, b: &Line, boundary: &Square) -> Vec<Line> {
 
 // p1 is the point the line will pass through
 // p2 is the point that will fold onto the line
-pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, boundary: &Square) -> Vec<Line> {
+pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, boundary: &Rect) -> Vec<Line> {
 	let p1base = p1.dot(&l.u);
 	let a = l.d - p1base;  // maybe reverse
 	let c = p1.distance_to(&p2);
@@ -74,10 +77,12 @@ pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, boundary: &Square) -> Vec<Lin
 	return solutions;
 }
 
+// cube root preserve sign
 fn cubrt (n: f64) -> f64 {
 	if n < 0.0 { -(-n).powf(1.0/3.0) } else { n.powf(1.0/3.0) }
 }
 
+// Robert Lang's cubic solver from Reference Finder
 fn polynomial (degree: u8, a: f64, b: f64, c: f64, d: f64) -> Vec<f64> {
 	// linear
 	if degree == 1 { return vec![-d / c]; }
@@ -140,7 +145,7 @@ pub fn axiom6 (
 	p2: &Vector,
 	l1: &Line,
 	l2: &Line,
-	boundary: &Square
+	boundary: &Rect
 ) -> Vec<Line> {
 	// at least pointA must not be on lineA
 	// for some reason this epsilon is much higher than 1e-6
@@ -166,34 +171,18 @@ pub fn axiom6 (
 	if c.abs() > EPSILON { polynomial_degree = 1; }
 	if b.abs() > EPSILON { polynomial_degree = 2; }
 	if a.abs() > EPSILON { polynomial_degree = 3; }
-	// return polynomial(polynomial_degree, a, b, c, d)
-	// 	.iter()
-	// 	.map(|n| l1.u.scale(l1.d).add(&line_vec.scale(*n)))
-	// 	.map(|p| Line {
-	// 		u: p.subtract(p1).normalize(),
-	// 		d: p.subtract(p1).normalize().dot(&p.midpoint(&p1))
-	// 	})
-	// 	.collect::<Vec<Line>>();
 	let roots = polynomial(polynomial_degree, a, b, c, d);
-	let mirrors1 = roots.iter()
+	let mirrors1: Vec<Vector> = roots.iter()
 		.map(|n| l1.u.scale(l1.d).add(&line_vec.scale(*n)))
-		.collect::<Vec<Vector>>();
-	let solutions = mirrors1.iter()
-		.map(|p| Line {
-			u: p.subtract(p1).normalize(),
-			d: p.subtract(p1).normalize().dot(&p.midpoint(&p1))
-		})
-		.collect::<Vec<Line>>();
-	let mirrors2 = solutions.iter()
+		.collect();
+	// this tuple temporarily stores (the point, the line's u vector)
+	let solutions: Vec<Line> = mirrors1.iter()
+		.map(|p| (p, p.subtract(p1).normalize()))
+		.map(|el| Line { u: el.1, d: el.1.dot(&el.0.midpoint(&p1)) })
+		.collect();
+	let mirrors2: Vec<Vector> = solutions.iter()
 		.map(|l| p2.add(&l.u.scale(2.0 * (l.d - p2.dot(&l.u)))))
-		.collect::<Vec<Vector>>();
-
-	// need to implement FromIterator for Vec<Line>
-	// return solutions.iter().enumerate()
-	// 	.filter(|(i, el)| boundary.contains(&mirrors1[*i])
-	// 		&& boundary.contains(&mirrors2[*i]))
-	// 	.map(|(_, el)| el)
-	// 	.collect::<Vec<Line>>();
+		.collect();
 	let mut lines: Vec<Line> = vec![];
 	for i in 0..solutions.len() {
 		if boundary.contains(&mirrors1[i])
@@ -201,12 +190,18 @@ pub fn axiom6 (
 			lines.push(solutions[i]);
 		}
 	}
+	// this style: need to implement FromIterator for Vec<Line>
+	// return solutions.iter().enumerate()
+	// 	.filter(|(i, el)| boundary.contains(&mirrors1[*i])
+	// 		&& boundary.contains(&mirrors2[*i]))
+	// 	.map(|(_, el)| el)
+	// 	.collect::<Vec<Line>>();
 	return lines;
 }
 
 // l1 is the perpendicular to our solution
 // l2 is the line we bring the point onto
-pub fn axiom7 (p: &Vector, l1: &Line, l2: &Line, _boundary: &Square) -> Vec<Line> {
+pub fn axiom7 (p: &Vector, l1: &Line, l2: &Line, _boundary: &Rect) -> Vec<Line> {
 	let u = l1.u.rotate90();
 	let u_u = u.dot(&l2.u);
 	// if u_u is close to 0, the two input lines are parallel, no solution

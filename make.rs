@@ -15,7 +15,7 @@ use random::Rand;
 
 const DEBUG: bool = false;
 
-pub fn compute_intersections (
+pub fn make_intersections (
 	points: &mut QuadTree, // already existing intersection points
 	old_lines: &Vec<(Line, u64)>, // all lines from previous rounds
 	new_lines: &Vec<(Line, u64)>, // the newest set of lines
@@ -44,7 +44,7 @@ pub fn compute_intersections (
 	return round;
 }
 
-pub fn compute_axiom1 (
+pub fn make_axiom1 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	old_lines: &mut LineContainer, // the previous round of lines (build from this)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
@@ -60,7 +60,7 @@ pub fn compute_axiom1 (
 	}
 }
 
-pub fn compute_axiom2 (
+pub fn make_axiom2 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	old_lines: &mut LineContainer, // the previous round of lines (build from this)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
@@ -76,7 +76,7 @@ pub fn compute_axiom2 (
 	}
 }
 
-pub fn compute_axiom3 (
+pub fn make_axiom3 (
 	_points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
@@ -84,7 +84,7 @@ pub fn compute_axiom3 (
 	boundary: &Rect
 ) {
 	for i in 0..lines.len() - 1 {
-		if DEBUG { println!("{}/{}: {} axiom 3", i, _points.len(), new_lines.len()); }
+		if DEBUG { println!("{}/{}: {} axiom 3", i, lines.len(), new_lines.len()); }
 		for j in (i + 1)..lines.len() {
 			let solutions = axiom3(&lines[i].0, &lines[j].0, boundary);
 			for k in 0..solutions.len() {
@@ -96,7 +96,7 @@ pub fn compute_axiom3 (
 	}
 }
 
-pub fn compute_axiom4 (
+pub fn make_axiom4 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
@@ -116,7 +116,7 @@ pub fn compute_axiom4 (
 	}
 }
 
-pub fn compute_axiom5 (
+pub fn make_axiom5 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
@@ -139,7 +139,7 @@ pub fn compute_axiom5 (
 	}
 }
 
-pub fn compute_axiom6 (
+pub fn make_axiom6 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
@@ -210,7 +210,7 @@ pub fn shortcut_axiom6 (
 	}
 }
 
-pub fn compute_axiom7 (
+pub fn make_axiom7 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)

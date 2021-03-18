@@ -3,6 +3,8 @@ use Line;
 const BUCKET: usize = 10000;
 const BUCKET_F: f64 = 10000.0;
 
+// fn binary_search (&Vec<Line>
+
 pub struct LineContainer {
 	pub buckets: Vec<Vec<(Line, u64)>>
 }

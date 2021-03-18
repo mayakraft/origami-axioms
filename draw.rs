@@ -1,16 +1,31 @@
 use std::fs::File;
+// use std::fs;
 use std::io::prelude::*;
 use Vector;
 use Segment;
 
-fn svg_points (points: &Vec<&Vector>) -> String {
+const STROKE_W: f64 = 0.0002;
+
+const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"907px\" height=\"907px\">\n";
+
+fn unit_square_boundary() -> String {
+    format!("<g stroke=\"white\" stroke-width=\"{}\" stroke-opacity=\"1.0\">\n<line x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" />\n<line x1=\"1\" y1=\"0\" x2=\"1\" y2=\"1\" />\n<line x1=\"1\" y1=\"1\" x2=\"0\" y2=\"1\" />\n<line x1=\"0\" y1=\"1\" x2=\"0\" y2=\"0\" />\n</g>\n", STROKE_W)
+}
+
+fn circle_elements (points: &Vec<&(Vector, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
+    let mut max_occurrence: f64 = 0.0;
+	for i in 0..points.len() {
+		if points[i].1 as f64 > max_occurrence { max_occurrence = points[i].1 as f64; }
+	}
 	for i in 0..points.len() {
 		let mut string: String = String::new();
+		let opacity: f64 = ((points[i].1 as f64) / max_occurrence).powf(0.15);
 		string.push_str("<circle ");
-		string.push_str(&format!("cx=\"{}\" ", points[i].x));
-		string.push_str(&format!("cy=\"{}\" ", points[i].y));
-		string.push_str(&format!("r=\"{}\" ", 0.002));
+		string.push_str(&format!("cx=\"{}\" ", points[i].0.x));
+		string.push_str(&format!("cy=\"{}\" ", points[i].0.y));
+		string.push_str(&format!("r=\"{}\" ", 0.0005));
+		string.push_str(&format!("opacity=\"{}\" ", opacity));
 		string.push_str("/>\n");
 		strings.push(string);
 	}
@@ -21,7 +36,7 @@ fn svg_points (points: &Vec<&Vector>) -> String {
 	return string;
 }
 
-fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
+fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	let mut max_occurrence: f64 = 0.0;
 	for i in 0..segments.len() {
@@ -29,12 +44,15 @@ fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
 	}
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
-		let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.3);
-		// let mut opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.15);
-		// if opacity > 1.0 { opacity = 1.0 }
-		// opacity *= 0.1;
-		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence);
-		string.push_str(&format!("<line stroke-opacity=\"{}\" ", opacity));
+		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.4) * 0.8;
+		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.6) * 0.75;
+		// let opacity: f64 = 0.03 + 0.15 * ((segments[i].1 as f64) / max_occurrence).powf(0.3);
+		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence);	
+		let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.15);
+        string.push_str(&format!("<line stroke-opacity=\"{}\" ", opacity));
+
+        // let hue: u8 = ((((segments[i].1 - 1) as f64) / max_occurrence) * 300.0) as u8;
+		// string.push_str(&format!("<line stroke=\"hsl({}, 100%, 50%)\" ", hue));
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));
 		string.push_str(&format!("x2=\"{}\" ", segments[i].0.b.x));
@@ -49,29 +67,39 @@ fn svg_lines (segments: &Vec<(Segment, u64)>) -> String {
 	return string;
 }
 
-fn write(string: &String) -> std::io::Result<()> {
-	let mut file = File::create("image.svg")?;
-	file.write_all(string.as_bytes())?;
+pub fn svg_lines(segments: &Vec<(Segment, u64)>) -> String {
+    let mut svg: String = String::new();
+	svg.push_str(&SVG_HEADER.to_string());
+	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
+	svg.push_str(&format!("<g fill=\"none\" stroke=\"white\" stroke-width=\"{}\">\n", STROKE_W));
+	svg.push_str(&line_elements(&segments));
+	svg.push_str("</g>\n");
+    svg.push_str(&unit_square_boundary());
+	svg.push_str("</svg>\n");
+    return svg;
+}
+
+pub fn svg_points(points: &Vec<&(Vector, u64)>) -> String {
+    let mut svg: String = String::new();
+	svg.push_str(&SVG_HEADER.to_string());
+	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
+	svg.push_str("<g fill=\"white\" stroke=\"none\">\n");
+	svg.push_str(&circle_elements(&points));
+	svg.push_str("</g>\n");
+    // svg.push_str(&unit_square_boundary());
+	svg.push_str("</svg>\n");
+    return svg;
+}
+
+fn write(filename: String, data: &String) -> std::io::Result<()> {
+	let mut file = File::create(format!("images/{}", filename))?;
+	file.write_all(data.as_bytes())?;
 	Ok(())
 }
 
-pub fn draw (segments: &Vec<(Segment, u64)>, _points: &Vec<&Vector>) {
-	let mut svg: String = String::new();
-	svg.push_str("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"2000px\" height=\"2000px\">\n");
-	svg.push_str("<g fill=\"none\" stroke=\"white\" stroke-width=\"0.0002\">\n");
-	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
-	svg.push_str(&svg_lines(&segments));
-	// boundary
-	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" />\n");
-	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"1\" y1=\"0\" x2=\"1\" y2=\"1\" />\n");
-	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"1\" y1=\"1\" x2=\"0\" y2=\"1\" />\n");
-	svg.push_str("<line stroke-opacity=\"1.0\" x1=\"0\" y1=\"1\" x2=\"0\" y2=\"0\" />\n");
-
-	svg.push_str("</g>\n");
-	// svg.push_str("<g fill=\"#e53\" stroke=\"none\">\n");
-	// svg.push_str(&svg_points(points));
-	// svg.push_str("</g>\n");
-	svg.push_str("</svg>\n");
-	let _res = write(&svg);
+pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&(Vector, u64)>) {
+    // fs::create_dir_all("/images")?;
+	let _res_p = write("points.svg".to_string(), &svg_points(points));
+	let _res_l = write("lines.svg".to_string(), &svg_lines(segments));
 }
 

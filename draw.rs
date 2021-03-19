@@ -4,9 +4,10 @@ use std::io::prelude::*;
 use Vector;
 use Segment;
 
-const STROKE_W: f64 = 0.0002;
+const STROKE_W: f64 = 0.002;
 
-const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"907px\" height=\"907px\">\n";
+// const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"907px\" height=\"907px\">\n";
+const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"600px\" height=\"600px\">\n";
 
 fn unit_square_boundary() -> String {
     format!("<g stroke=\"white\" stroke-width=\"{}\" stroke-opacity=\"1.0\">\n<line x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" />\n<line x1=\"1\" y1=\"0\" x2=\"1\" y2=\"1\" />\n<line x1=\"1\" y1=\"1\" x2=\"0\" y2=\"1\" />\n<line x1=\"0\" y1=\"1\" x2=\"0\" y2=\"0\" />\n</g>\n", STROKE_W)
@@ -14,13 +15,15 @@ fn unit_square_boundary() -> String {
 
 fn circle_elements (points: &Vec<&(Vector, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
-    let mut max_occurrence: f64 = 0.0;
+	// get the largest repeat value. scale all others in relation to this
+    let mut repeat_max_f: u64 = 0;
 	for i in 0..points.len() {
-		if points[i].1 as f64 > max_occurrence { max_occurrence = points[i].1 as f64; }
+		if points[i].1 > repeat_max_f { repeat_max_f = points[i].1; }
 	}
+	let repeat_max: f64 = repeat_max_f as f64;
 	for i in 0..points.len() {
+		let opacity: f64 = ((points[i].1 as f64) / repeat_max).powf(0.15);
 		let mut string: String = String::new();
-		let opacity: f64 = ((points[i].1 as f64) / max_occurrence).powf(0.15);
 		string.push_str("<circle ");
 		string.push_str(&format!("cx=\"{}\" ", points[i].0.x));
 		string.push_str(&format!("cy=\"{}\" ", points[i].0.y));
@@ -36,27 +39,33 @@ fn circle_elements (points: &Vec<&(Vector, u64)>) -> String {
 	return string;
 }
 
+
 fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
-	let mut max_occurrence: f64 = 0.0;
+	// get the largest repeat value. scale all others in relation to this
+	let mut repeat_max_f: u64 = 0;
 	for i in 0..segments.len() {
-		if segments[i].1 as f64 > max_occurrence { max_occurrence = segments[i].1 as f64; }
+		if segments[i].1 > repeat_max_f { repeat_max_f = segments[i].1; }
 	}
+	let repeat_max: f64 = repeat_max_f as f64;
 	for i in 0..segments.len() {
 		let mut string: String = String::new();
-		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.4) * 0.8;
-		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.6) * 0.75;
-		// let opacity: f64 = 0.03 + 0.15 * ((segments[i].1 as f64) / max_occurrence).powf(0.3);
-		// let opacity: f64 = ((segments[i].1 as f64) / max_occurrence);	
-		let opacity: f64 = ((segments[i].1 as f64) / max_occurrence).powf(0.15);
-        string.push_str(&format!("<line stroke-opacity=\"{}\" ", opacity));
-
-        // let hue: u8 = ((((segments[i].1 - 1) as f64) / max_occurrence) * 300.0) as u8;
-		// string.push_str(&format!("<line stroke=\"hsl({}, 100%, 50%)\" ", hue));
+		let pct: f64 = (segments[i].1 as f64) / repeat_max; // (0.0, 1.0]
+		let pct2: f64 = ((segments[i].1 - 1) as f64) / repeat_max;  // [0.0, 1.0)
+		// let gray: u8 = (255.0 * pct.powf(0.33)).floor() as u8;
+        let hue: u8 = (pct2 * 300.0) as u8;
+		// let opacity: f64 = pct.powf(0.4) * 0.8;
+		// let opacity: f64 = pct.powf(0.6) * 0.75;
+		// let opacity: f64 = 0.03 + 0.15 * (pct.powf(0.3);
+		let opacity: f64 = pct.powf(0.15);
+        string.push_str("<line ");
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));
 		string.push_str(&format!("x2=\"{}\" ", segments[i].0.b.x));
 		string.push_str(&format!("y2=\"{}\" ", segments[i].0.b.y));
+        // string.push_str(&format!("stroke-opacity=\"{}\" ", opacity));
+		// string.push_str(&format!("stroke=\"rgb({},{},{})\" ", gray, gray, gray));
+		string.push_str(&format!("stroke=\"hsl({}, 85%, 45%)\" ", hue));
 		string.push_str("/>\n");
 		strings.push(string);
 	}

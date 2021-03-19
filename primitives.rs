@@ -101,6 +101,44 @@ impl Line {
 		// this allows (1,0) and (-1,0) to be treated the same
 		((self.d - l.d * self.u.dot(&l.u)).abs() < EPSILON)
 	}
+    pub fn reflectVector (&self, p: &Vector) -> Vector {
+        let v1 = self.u.scale(self.d);
+        let rot90 = self.u.rotate90();
+        let v2 = rot90.scale(p.dot(&rot90));
+        let projection = v1.add(&v2);
+        return projection.add(&projection.subtract(&p));
+    }
+    pub fn reflectSegment (&self, s: &Segment) -> Segment {
+        Segment {
+            a: self.reflectVector(&s.a),
+            b: self.reflectVector(&s.b)
+        }
+    }
+}
+
+impl Segment {
+    // given we already know these two segments are collinear
+    // check if they also overlap
+    pub fn quick_overlap (&self, b: &Segment) -> bool {
+        // seg a
+        let vec_a = self.b.subtract(&self.a);
+        let mag_a = vec_a.magnitude();
+        let norm_a = vec_a.normalize();
+        // seg b
+        let vec_b = b.b.subtract(&b.a);
+        let mag_b = vec_b.magnitude();
+        let norm_b = vec_b.normalize();
+        // project the other other segment's points onto its vector
+        let aa = norm_b.dot(&self.a.subtract(&b.a));
+        let ab = norm_b.dot(&self.b.subtract(&b.a));
+        let ba = norm_a.dot(&b.a.subtract(&self.a));
+        let bb = norm_a.dot(&b.b.subtract(&self.a));
+        let t1 = aa >= 0.0 && aa <= mag_b;
+        let t2 = ab >= 0.0 && ab <= mag_b;
+        let t3 = ba >= 0.0 && ba <= mag_a;
+        let t4 = bb >= 0.0 && bb <= mag_a;
+        return t1 || t2 || t3 || t4;
+    }
 }
 
 impl Rect {
@@ -130,6 +168,11 @@ impl Rect {
 			.collect();
 		let smallest = *ts.iter().fold(&ts[0], |a, b| if b < a {b} else {a});
 		let largest = *ts.iter().fold(&ts[0], |a, b| if b > a {b} else {a});
+        // if the two points are the same the segment is degenerate
+        if (smallest - largest).abs() < EPSILON {
+			return (false,
+				Segment {a:Vector {x:0.0, y:0.0}, b:Vector {x:0.0, y:0.0}});
+        }
 		return (true, Segment {
 			a: origin.add(&vector.scale(smallest)),
 			b: origin.add(&vector.scale(largest))

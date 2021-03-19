@@ -64,8 +64,11 @@ fn line_tests () {
 	};
 	let equivalent_a: bool = a.equivalent(&b);
 	let equivalent_b: bool = b.equivalent(&a);
+    let reflect1 = a.reflectVector(&Vector { x: 0.2, y: -0.2 });
 	assert_eq!(equivalent_a, false);
 	assert_eq!(equivalent_b, false);
+    assert_delta!(reflect1.x, 1.2, EPSILON);
+    assert_delta!(reflect1.y, 0.8, EPSILON);
 
 	// make sure these should be duplicate
 	// test if they are duplicate

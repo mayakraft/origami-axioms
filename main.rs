@@ -27,10 +27,10 @@ fn make_round (
 	// all axioms will be built from function arguments points and lines
 	// from the previous round (make points into Vector from the quadtree)
 
-	// let points = point_quadtree.flatten();
-	// let lines = line_container.flatten();
-	let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>16, _=>144});
-	let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>6, _=>12});
+	let points = point_quadtree.flatten();
+	let lines = line_container.flatten();
+	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>16, _=>144});
+	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>6, _=>12});
 	// let pts_ax5 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>72, _=>144});
 	// let lns_ax5 = line_container.flatten_filter(match round {0..=1=>0, 2=>8, 3=>64, _=>144});
 	// let pts_ax6 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>12, 3=>72, _=>144});
@@ -106,7 +106,7 @@ fn main () {
 	points.push(&Vector { x: 0.0, y: 1.0 });
 	unit_square.sides.iter().for_each(|side| lines.push(side));
 
-	for round in 0..5 {
+	for round in 0..2 {
 		make_round(round, &mut points, &mut lines, &unit_square);
 		println!("done round {} ({} lines {} points)", round + 1, lines.len(), points.len());
 		// 	because some lines are being made outside of the square, we need to filter
@@ -125,6 +125,10 @@ fn main () {
 	marks.sort_by_key(|el| el.1);
     
     draw(&segments, &marks);
+
+    for i in 0..segments.len() {
+        println!("{}: {:?}", i, segments[i]);
+    }
 	
     println!("finished. {} lines, {} segments, {} points",
         lines.len(), segments.len(), points.len());

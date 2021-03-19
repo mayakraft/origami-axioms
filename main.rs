@@ -4,7 +4,7 @@ mod quadtree;
 mod linecontainer;
 mod tests;
 mod draw;
-mod random;
+// mod random;
 mod make;
 use primitives::Vector;
 use primitives::Line;
@@ -19,7 +19,7 @@ use tests::run_tests;
 use draw::draw;
 
 fn make_round (
-	round: usize,
+	_round: usize,
 	point_quadtree: &mut QuadTree,
 	line_container: &mut LineContainer,
 	boundary: &Rect
@@ -29,6 +29,8 @@ fn make_round (
 
 	let points = point_quadtree.flatten();
 	let lines = line_container.flatten();
+	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>3, _=>12});
+
 	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>16, _=>144});
 	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>6, _=>12});
 	// let pts_ax5 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>72, _=>144});
@@ -38,8 +40,8 @@ fn make_round (
 	// let pts_ax7 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>4, 3=>72, _=>144});
 	// let lns_ax7 = line_container.flatten_filter(match round {0..=1=>0, 2=>4, 3=>64, _=>144});
 
-    // // this is good for making points. faster than the other. half a million points.
-    // let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>24, 3=>72, _=>144});
+	// // this is good for making points. faster than the other. half a million points.
+	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>24, 3=>72, _=>144});
 	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>16, 3=>64, _=>144});
 	// let pts_ax5 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>36, 3=>72, _=>144});
 	// let lns_ax5 = line_container.flatten_filter(match round {0..=1=>0, 2=>36, 3=>64, _=>144});
@@ -48,9 +50,8 @@ fn make_round (
 	// let pts_ax7 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>36, 3=>72, _=>144});
 	// let lns_ax7 = line_container.flatten_filter(match round {0..=1=>0, 2=>36, 3=>64, _=>144});
 
-
-    // // this is good for making points. still takes a while
-    // let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>12, 3=>72, _=>144});
+	// // this is good for making points. still takes a while
+	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>12, 3=>72, _=>144});
 	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>8, 3=>64, _=>144});
 	// let pts_ax5 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>28, 3=>72, _=>144});
 	// let lns_ax5 = line_container.flatten_filter(match round {0..=1=>0, 2=>28, 3=>64, _=>144});
@@ -81,11 +82,11 @@ fn make_round (
 	let new_lines = new_line_container.flatten();
 	let old_lines = line_container.flatten();
 
-	// let mut new_points: QuadTree = make::make_intersections(
-	// 	point_quadtree, &old_lines, &new_lines, boundary);
-	let mut new_points: QuadTree = if round < 2 {
-		make::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
-	} else { make_tree() };
+	let mut new_points: QuadTree = make::make_intersections(
+		point_quadtree, &old_lines, &new_lines, boundary);
+	// let mut new_points: QuadTree = if round < 2 {
+	// 	make::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
+	// } else { make_tree() };
 
 	// point_quadtree, lines, &mut new_lines, boundary);
 	// 3. merge points and lines from this new round
@@ -121,19 +122,19 @@ fn main () {
 		.map(|el| ( (el.2).1, el.1) )
 		.collect();
 	let mut marks: Vec<&(Vector, u64)> = points.flatten();
-    segments.sort_by_key(|el| el.1);
+	segments.sort_by_key(|el| el.1);
 	marks.sort_by_key(|el| el.1);
-    
-    draw(&segments, &marks);
+	
+	draw(&segments, &marks);
 
-    for i in 0..segments.len() {
-        println!("{}: {:?}", i, segments[i]);
-    }
+	// for i in 0..segments.len() {
+	//     println!("{}: {:?}", i, segments[i]);
+	// }
 	
-    println!("finished. {} lines, {} segments, {} points",
-        lines.len(), segments.len(), points.len());
+	println!("finished. {} lines, {} segments, {} points",
+		lines.len(), segments.len(), points.len());
 	
-    // make rust not complain about unused functions
+	// make rust not complain about unused functions
 	run_tests();
 }
 

@@ -11,7 +11,7 @@ use axioms::axiom4;
 use axioms::axiom5;
 use axioms::axiom6;
 use axioms::axiom7;
-use random::Rand;
+// use random::Rand;
 
 const DEBUG: bool = false;
 
@@ -165,50 +165,50 @@ pub fn make_axiom6 (
 	}
 }
 
-pub fn shortcut_axiom6 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
-	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
-	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-	boundary: &Rect
-) {
-	let mut rand = Rand::new(0);
-	let steps: usize = 15;
-	let point_step = (points.len() as f64) / (steps as f64);
-	let line_step = (lines.len() as f64) / (steps as f64);
-	let point_step_i = ((points.len() as f64) / (steps as f64)) as i32;
-	let line_step_i = ((lines.len() as f64) / (steps as f64)) as i32;
-	// println!("len {}p, {}l, steps: {}, {}p, {}l, {}, {}", points.len(), lines.len(), steps, point_step, line_step, steps * point_step, steps * line_step);
-	for istep in 0..steps { // points
-		let i = (istep as f64 * point_step).floor() as usize;
-		for jstep in 0..steps { // points
-			let j = (jstep as f64 * point_step).floor() as usize;
-			if DEBUG { println!("{}/{}pts: ({}pt): {} axiom 6", i, points.len(), j, new_lines.len()); }
-			if i == j { continue }
-			for kstep in 0..steps { // lines
-				let k = (kstep as f64 * line_step).floor() as usize;
-				for lstep in 0..steps { // lines
-					let l = (lstep as f64 * line_step).floor() as usize;
-					if k == l { continue }
-					let mut ii = i + rand.rand_range(0, point_step_i) as usize;
-					let mut jj = j + rand.rand_range(0, point_step_i) as usize;
-					let mut kk = k + rand.rand_range(0, line_step_i) as usize;
-					let mut ll = l + rand.rand_range(0, line_step_i) as usize;
-					if ii >= points.len() { ii = i }
-					if jj >= points.len() { jj = j }
-					if kk >= lines.len() { kk = k }
-					if ll >= lines.len() { ll = l }
-					let solutions = axiom6(&points[ii].0, &points[jj].0, &lines[kk].0, &lines[ll].0, boundary);
-					for m in 0..solutions.len() {
-						if old_lines.increment_match(&solutions[m]) { continue }
-						if new_lines.increment_match(&solutions[m]) { continue }
-						new_lines.push(&solutions[m]);
-					}
-				}
-			}
-		}
-	}
-}
+// pub fn shortcut_axiom6 (
+// 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
+// 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+// 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
+// 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
+// 	boundary: &Rect
+// ) {
+// 	let mut rand = Rand::new(0);
+// 	let steps: usize = 15;
+// 	let point_step = (points.len() as f64) / (steps as f64);
+// 	let line_step = (lines.len() as f64) / (steps as f64);
+// 	let point_step_i = ((points.len() as f64) / (steps as f64)) as i32;
+// 	let line_step_i = ((lines.len() as f64) / (steps as f64)) as i32;
+// 	// println!("len {}p, {}l, steps: {}, {}p, {}l, {}, {}", points.len(), lines.len(), steps, point_step, line_step, steps * point_step, steps * line_step);
+// 	for istep in 0..steps { // points
+// 		let i = (istep as f64 * point_step).floor() as usize;
+// 		for jstep in 0..steps { // points
+// 			let j = (jstep as f64 * point_step).floor() as usize;
+// 			if DEBUG { println!("{}/{}pts: ({}pt): {} axiom 6", i, points.len(), j, new_lines.len()); }
+// 			if i == j { continue }
+// 			for kstep in 0..steps { // lines
+// 				let k = (kstep as f64 * line_step).floor() as usize;
+// 				for lstep in 0..steps { // lines
+// 					let l = (lstep as f64 * line_step).floor() as usize;
+// 					if k == l { continue }
+// 					let mut ii = i + rand.rand_range(0, point_step_i) as usize;
+// 					let mut jj = j + rand.rand_range(0, point_step_i) as usize;
+// 					let mut kk = k + rand.rand_range(0, line_step_i) as usize;
+// 					let mut ll = l + rand.rand_range(0, line_step_i) as usize;
+// 					if ii >= points.len() { ii = i }
+// 					if jj >= points.len() { jj = j }
+// 					if kk >= lines.len() { kk = k }
+// 					if ll >= lines.len() { ll = l }
+// 					let solutions = axiom6(&points[ii].0, &points[jj].0, &lines[kk].0, &lines[ll].0, boundary);
+// 					for m in 0..solutions.len() {
+// 						if old_lines.increment_match(&solutions[m]) { continue }
+// 						if new_lines.increment_match(&solutions[m]) { continue }
+// 						new_lines.push(&solutions[m]);
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
 pub fn make_axiom7 (
 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)

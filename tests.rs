@@ -1,8 +1,14 @@
 use Vector;
 use Line;
+use Segment;
 use axioms;
 use Rect;
 use make_square;
+use make_line_container;
+use make_tree;
+use make;
+use QuadTree;
+use LineContainer;
 
 const EPSILON: f64 = f64::EPSILON * 10.0;
 
@@ -64,11 +70,12 @@ fn line_tests () {
 	};
 	let equivalent_a: bool = a.equivalent(&b);
 	let equivalent_b: bool = b.equivalent(&a);
-    let reflect1 = a.reflectVector(&Vector { x: 0.2, y: -0.2 });
+	let reflect1 = a.reflect_vector(&Vector { x: 0.2, y: -0.2 });
+	let _reflect2 = a.reflect_segment(&Segment { a: Vector{x:0.0, y:0.0}, b: Vector {x:1.0, y:1.0} });
 	assert_eq!(equivalent_a, false);
 	assert_eq!(equivalent_b, false);
-    assert_delta!(reflect1.x, 1.2, EPSILON);
-    assert_delta!(reflect1.y, 0.8, EPSILON);
+	assert_delta!(reflect1.x, 1.2, EPSILON);
+	assert_delta!(reflect1.y, 0.8, EPSILON);
 
 	// make sure these should be duplicate
 	// test if they are duplicate
@@ -84,6 +91,34 @@ fn line_tests () {
 // 		Line { u: Vector { x: 1.0 , y: 0.0 }, d: 0.0 }
 // 	]
 // };
+
+fn make_axiom_tests () {
+	let boundary: Rect = make_square();
+	let mut point_quadtree: QuadTree = make_tree();
+	let mut line_container: LineContainer = make_line_container();
+	point_quadtree.push(&Vector { x: 0.0, y: 0.0 });
+	point_quadtree.push(&Vector { x: 1.0, y: 0.0 });
+	point_quadtree.push(&Vector { x: 1.0, y: 1.0 });
+	point_quadtree.push(&Vector { x: 0.0, y: 1.0 });
+	boundary.sides.iter().for_each(|side| line_container.push(side));
+	let points = point_quadtree.flatten();
+	let lines = line_container.flatten();
+	let _points1 = point_quadtree.flatten_filter(0);
+	let _points2 = point_quadtree.filter_by_count(0);
+	let _lines1 = line_container.flatten_filter(0);
+	let mut new_line_container: LineContainer = make_line_container();
+	make::make_axiom1(&points, &mut line_container, &mut new_line_container);
+	make::make_axiom2(&points, &mut line_container, &mut new_line_container);
+	make::make_axiom3(&points, &lines, &mut line_container, &mut new_line_container, &boundary);
+	make::make_axiom4(&points, &lines, &mut line_container, &mut new_line_container, &boundary);
+	make::make_axiom5(&points, &lines, &mut line_container, &mut new_line_container, &boundary);
+	make::make_axiom6(&points, &lines, &mut line_container, &mut new_line_container, &boundary);
+	make::make_axiom7(&points, &lines, &mut line_container, &mut new_line_container, &boundary);
+	let new_lines = new_line_container.flatten();
+	let old_lines = line_container.flatten();
+	let _new_points: QuadTree = make::make_intersections(
+		&mut point_quadtree, &old_lines, &new_lines, &boundary);
+}
 
 fn axiom_tests () {
 	let unit_square: Rect = make_square();
@@ -144,12 +179,12 @@ fn axiom1 () {
 }
 
 fn make_line (vector: &Vector, origin: &Vector) -> Line {
-  // let mag = vector.magnitude();
-  let u = vector.normalize().rotate90();
-  let d = origin.dot(&u); // / mag;
-  return if d < 0.0
-	{ Line { u: Vector { x: -u.x, y: -u.y }, d: -d } } else
-	{ Line { u: Vector { x:  u.x, y:  u.y }, d: d } };
+	// let mag = vector.magnitude();
+	let u = vector.normalize().rotate90();
+	let d = origin.dot(&u); // / mag;
+	return if d < 0.0
+		{ Line { u: Vector { x: -u.x, y: -u.y }, d: -d } } else
+		{ Line { u: Vector { x:  u.x, y:  u.y }, d: d } };
 }
 
 fn axiom5 () {
@@ -218,6 +253,7 @@ fn axiom6 () {
 pub fn run_tests () {
 	vector_tests();
 	axiom_tests();
+	make_axiom_tests();
 	line_tests();
 	axiom1();
 	axiom5();

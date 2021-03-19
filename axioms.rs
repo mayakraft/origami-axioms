@@ -19,15 +19,21 @@ pub fn axiom2 (a: &Vector, b: &Vector) -> Line {
 	return Line { u: u, d: d };
 }
 
+// for testing axiom 3:
+// 1. chop the input parameter lines into segments inside the boundary
+// 2. for each solution (1 or 2), make solution a reflection line
+// 3. reflect one input paramter (should be on top of the other)
+//    and test for any point to be inside the other segment.
 pub fn axiom3 (a: &Line, b: &Line, boundary: &Rect) -> Vec<Line> {
+	let seg_a = boundary.clip(a);
+	let seg_b = boundary.clip(b);
+	if !seg_a.0 || !seg_b.0 { println!("AX3 this should not happen"); return vec![]; }
 	// get intersection and a test if they are parallel
 	let intersect = a.intersect(&b);
 	// if lines are parallel only one solution exists
 	if !intersect.0 {
-		let d = (a.d + b.d * a.u.dot(&b.u)) / 2.0;
 		// special case, because this is a square, we don't need to test any further
-        println!("1 result");
-		return vec![ Line { u: a.u, d: d } ];
+		return vec![ Line { u: a.u, d: (a.d + b.d * a.u.dot(&b.u)) / 2.0 } ];
 	}
 	// 2 solutions
 	let u1 = a.u.add(&b.u).normalize();
@@ -35,29 +41,19 @@ pub fn axiom3 (a: &Line, b: &Line, boundary: &Rect) -> Vec<Line> {
 	let d1 = intersect.1.dot(&u1);
 	let d2 = intersect.1.dot(&u2);
 	let solutions: Vec<Line> = vec![ Line { u: u1, d: d1 }, Line { u: u2, d: d2 } ];
-    // for testing axiom 3:
-    // 1. chop the input parameter lines into segments inside the boundary
-    // 2. for each solution (1 or 2), make solution a reflection line
-    // 3. reflect one input paramter (should be on top of the other)
-    //    and test for any point to be inside the other segment.
-    let seg_a = boundary.clip(a);
-    let seg_b = boundary.clip(b);
-    if !seg_a.0 || !seg_b.0 { println!("AX3 LINE OUTSIDE PAGE"); return vec![]; }
-    // are the solutions inside the page
-    let inside_test: Vec<bool> = solutions.iter()
-        .map(|line| boundary.clip(&line).0)
-        .collect();
-    // seg_a will be the only one reflected
-    let reflect_test: Vec<bool> = solutions.iter()
-        .map(|l| l.reflectSegment(&seg_a.1))
-        .map(|seg| seg.quick_overlap(&seg_b.1))
-        .collect();
-    println!("are the solutions inside? {:?}", inside_test);
-    println!("axiom 3 test {:?}", reflect_test);
+	// are the solutions inside the page
+	let inside_test: Vec<bool> = solutions.iter()
+		.map(|line| boundary.clip(&line).0)
+		.collect();
+	// seg_a will be the only one reflected
+	let reflect_test: Vec<bool> = solutions.iter()
+		.map(|l| l.reflect_segment(&seg_a.1))
+		.map(|seg| seg.quick_overlap(&seg_b.1))
+		.collect();
 	return solutions.iter().enumerate()
-        .filter(|(i, el)| inside_test[*i] && reflect_test[*i])
-        .map(|(i, el)| *el)
-        .collect();
+		.filter(|(i, _line)| inside_test[*i] && reflect_test[*i])
+		.map(|(_i, line)| *line)
+		.collect();
 }
 
 pub fn axiom4 (a: &Vector, b: &Line, boundary: &Rect) -> Vec<Line> {

@@ -69,31 +69,29 @@ pub fn axiom4 (a: &Vector, b: &Line, boundary: &Rect) -> Vec<Line> {
 	return if valid { vec![Line { u, d }] } else { vec![] }
 }
 
-// p1 is the point the line will pass through
-// p2 is the point that will fold onto the line
+// p1 is the point the line will pass through (does not move)
+// p2 is the point that will fold onto the line (moves)
 pub fn axiom5 (p1: &Vector, p2: &Vector, l: &Line, boundary: &Rect) -> Vec<Line> {
 	let p1base = p1.dot(&l.u);
-	let a = l.d - p1base;  // maybe reverse
+	let a = l.d - p1base;
 	let c = p1.distance_to(&p2);
-	// if a == c we have one solution
 	if a > c { return vec![] }
 	let b = (c * c - a * a).sqrt();
-	let a_vec = l.u.scale(a); // maybe reverse
+	let a_vec = l.u.scale(a);
 	let base_center = p1.add(&a_vec);
 	let base_vector = l.u.rotate90().scale(b);
-	let mirrors: [Vector; 2] = [
-		base_center.add(&base_vector),
-		base_center.subtract(&base_vector)
-	];
+	// if b is near 0 we have one solution, otherwise two
+	let mirrors: Vec<Vector> = if b < EPSILON { vec![base_center] }
+		else { vec![
+			base_center.add(&base_vector),
+			base_center.subtract(&base_vector)
+		]};
 	// for each construction to be valid its mirror point must be in the boundary
-	let mut solutions: Vec<Line> = vec![];
-	for i in 0..2 {
-		if boundary.contains(&mirrors[i]) {
-			let u = p2.subtract(&mirrors[i]).normalize();
-			solutions.push(Line { u, d: p1.dot(&u) });
-		}
-	}
-	return solutions;
+	return mirrors.iter()
+		.filter(|vec| boundary.contains(vec))
+		.map(|vec| p2.subtract(vec).normalize())
+		.map(|u| Line { u, d: p1.dot(&u) })
+		.collect::<Vec<Line>>();
 }
 
 // cube root preserve sign
@@ -230,3 +228,4 @@ pub fn axiom7 (p: &Vector, l1: &Line, l2: &Line, _boundary: &Rect) -> Vec<Line> 
 	let d = (l2.d + 2.0 * a * u_u - b) / (2.0 * u_u);
 	return vec![Line { u, d }];
 }
+

@@ -19,7 +19,7 @@ use tests::run_tests;
 use draw::draw;
 
 fn make_round (
-	_round: usize,
+	round: usize,
 	point_quadtree: &mut QuadTree,
 	line_container: &mut LineContainer,
 	boundary: &Rect
@@ -31,7 +31,7 @@ fn make_round (
 	let lines = line_container.flatten();
 	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>3, _=>12});
 
-	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>16, _=>144});
+	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>2, 3=>16, _=>144});
 	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>6, _=>12});
 	// let pts_ax5 = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>8, 3=>72, _=>144});
 	// let lns_ax5 = line_container.flatten_filter(match round {0..=1=>0, 2=>8, 3=>64, _=>144});
@@ -66,8 +66,9 @@ fn make_round (
 	// 1. compute all axioms for this round
 	// make::make_axiom1(&points, line_container, &mut new_line_container);
 	// make::make_axiom2(&points, line_container, &mut new_line_container);
-	make::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
+	// make::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
 	// make::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
+	make::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
 	// make::make_axiom5(&pts_ax5, &lns_ax5, line_container, &mut new_line_container, boundary);
 	// // make::shortcut_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
 	// make::make_axiom6(&pts_ax6, &lns_ax6, line_container, &mut new_line_container, boundary);
@@ -107,7 +108,7 @@ fn main () {
 	points.push(&Vector { x: 0.0, y: 1.0 });
 	unit_square.sides.iter().for_each(|side| lines.push(side));
 
-	for round in 0..2 {
+	for round in 0..3 {
 		make_round(round, &mut points, &mut lines, &unit_square);
 		println!("done round {} ({} lines {} points)", round + 1, lines.len(), points.len());
 		// 	because some lines are being made outside of the square, we need to filter

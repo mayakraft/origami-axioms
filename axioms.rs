@@ -66,6 +66,7 @@ pub fn axiom4 (a: &Vector, b: &Line, boundary: &Rect) -> Vec<Line> {
 	let vector = u.scale(dist);
 	let point = a.add(&vector);
 	let valid = boundary.contains(&point);
+	// todo more tests is needed, axiom 4 is generating lines outside the boundary
 	return if valid { vec![Line { u, d }] } else { vec![] }
 }
 
@@ -218,7 +219,7 @@ pub fn axiom6 (
 
 // l1 is the perpendicular to our solution
 // l2 is the line we bring the point onto
-pub fn axiom7 (p: &Vector, l1: &Line, l2: &Line, _boundary: &Rect) -> Vec<Line> {
+pub fn axiom7 (p: &Vector, l1: &Line, l2: &Line, boundary: &Rect) -> Vec<Line> {
 	let u = l1.u.rotate90();
 	let u_u = u.dot(&l2.u);
 	// if u_u is close to 0, the two input lines are parallel, no solution
@@ -226,6 +227,17 @@ pub fn axiom7 (p: &Vector, l1: &Line, l2: &Line, _boundary: &Rect) -> Vec<Line> 
 	let a = p.dot(&u);
 	let b = p.dot(&l2.u);
 	let d = (l2.d + 2.0 * a * u_u - b) / (2.0 * u_u);
-	return vec![Line { u, d }];
+	// test if construction is valid inside the boundary
+	let solution = Line {u, d};
+	let intersect = solution.intersect(&l1);
+	let reflection = solution.reflect_vector(&p);
+	// the reflected point should be inside the boundary
+	// todo: simplify this next line using variables above
+	let test1 = boundary.contains(&reflection);
+	// if this intersection isn't inside, the line can't be folded onto itself
+	let test2 = intersect.0 && boundary.contains(&intersect.1);
+	// mirror should not be the intersection point itself
+	let test3 = !reflection.equivalent(&intersect.1);
+	return if test1 && test2 && test3 { vec![solution] } else { vec![] };
 }
 

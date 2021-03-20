@@ -5,6 +5,7 @@ use Vector;
 use Segment;
 
 const STROKE_W: f64 = 0.0002;
+const RADIUS: f64 = 0.002;
 
 // const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"907px\" height=\"907px\">\n";
 const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"600px\" height=\"600px\">\n";
@@ -27,7 +28,7 @@ fn circle_elements (points: &Vec<&(Vector, u64)>) -> String {
 		string.push_str("<circle ");
 		string.push_str(&format!("cx=\"{}\" ", points[i].0.x));
 		string.push_str(&format!("cy=\"{}\" ", points[i].0.y));
-		string.push_str(&format!("r=\"{}\" ", 0.0005));
+		string.push_str(&format!("r=\"{}\" ", RADIUS));
 		string.push_str(&format!("opacity=\"{}\" ", opacity));
 		string.push_str("/>\n");
 		strings.push(string);
@@ -57,7 +58,8 @@ fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 		// let opacity: f64 = pct.powf(0.4) * 0.8;
 		// let opacity: f64 = pct.powf(0.6) * 0.75;
 		// let opacity: f64 = 0.03 + 0.15 * (pct.powf(0.3);
-		let opacity: f64 = pct.powf(0.33);
+		// let opacity: f64 = pct.powf(0.33);
+		let opacity: f64 = pct.powf(0.66);
 		string.push_str("<line ");
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));

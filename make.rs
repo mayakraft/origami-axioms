@@ -26,11 +26,13 @@ pub fn make_intersections (
 	let mut all_lines: Vec<(Line, u64)> = Vec::new();
 	for i in 0..new_lines.len() { all_lines.push(new_lines[i]) }
 	for i in 0..old_lines.len() { all_lines.push(old_lines[i]) }
+	// if this message prints, the for loop j in (i+1) will start beyond all_lines. needs fix
+	if old_lines.len() == 0 { println!("ATTN: make.rs, case not considered. need fix"); }
 	// get intersections points comparing two arrays: new_lines to old_lines
 	// this compares every new line to every new AND old line, but avoids
 	// old lines getting compared to themselves again (which already happened)
 	if new_lines.len() == 0 { return round }
-	for i in 0..new_lines.len() - 1 {
+	for i in 0..new_lines.len() {
 		if DEBUG { println!("{}/{}: {} new points", i, new_lines.len(), round.len()); }
 		for j in (i + 1)..all_lines.len() {
 			let (success, point) = new_lines[i].0.intersect(&all_lines[j].0);

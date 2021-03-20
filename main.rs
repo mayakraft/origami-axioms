@@ -66,9 +66,10 @@ fn make_round (
 	// 1. compute all axioms for this round
 	// make::make_axiom1(&points, line_container, &mut new_line_container);
 	// make::make_axiom2(&points, line_container, &mut new_line_container);
-	// make::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
-	// make::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
-	make::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
+	make::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
+	make::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
+	// make::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
+	make::make_axiom7(&points, &lines, line_container, &mut new_line_container, boundary);
 	// make::make_axiom5(&pts_ax5, &lns_ax5, line_container, &mut new_line_container, boundary);
 	// // make::shortcut_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
 	// make::make_axiom6(&pts_ax6, &lns_ax6, line_container, &mut new_line_container, boundary);
@@ -83,11 +84,11 @@ fn make_round (
 	let new_lines = new_line_container.flatten();
 	let old_lines = line_container.flatten();
 
-	let mut new_points: QuadTree = make::make_intersections(
-		point_quadtree, &old_lines, &new_lines, boundary);
-	// let mut new_points: QuadTree = if round < 2 {
-	// 	make::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
-	// } else { make_tree() };
+	// let mut new_points: QuadTree = make::make_intersections(
+	// 	point_quadtree, &old_lines, &new_lines, boundary);
+	let mut new_points: QuadTree = if round < 2 {
+		make::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
+	} else { make_tree() };
 
 	// point_quadtree, lines, &mut new_lines, boundary);
 	// 3. merge points and lines from this new round

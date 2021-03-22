@@ -1,22 +1,16 @@
-mod axioms;
-mod primitives;
-mod quadtree;
-mod linecontainer;
-mod tests;
-mod draw;
-// mod random;
-mod make;
-use primitives::Vector;
-use primitives::Line;
-use primitives::Segment;
-use primitives::Rect;
-use primitives::make_square;
-use quadtree::QuadTree;
-use quadtree::make_tree;
-use linecontainer::LineContainer;
-use linecontainer::make_line_container;
-use tests::run_tests;
-use draw::draw;
+extern crate origami_axioms;
+
+use origami_axioms::math::Vector;
+use origami_axioms::math::Line;
+use origami_axioms::math::Segment;
+use origami_axioms::math::Rect;
+use origami_axioms::math::make_square;
+use origami_axioms::fold;
+use origami_axioms::QuadTree;
+use origami_axioms::make_tree;
+use origami_axioms::LineContainer;
+use origami_axioms::make_line_container;
+use origami_axioms::draw::draw;
 
 fn make_round (
 	round: usize,
@@ -29,7 +23,8 @@ fn make_round (
 
 	let points = point_quadtree.flatten();
 	let lines = line_container.flatten();
-	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>3, _=>12});
+	// let points = point_quadtree.flatten_filter(match round {0=>0, 1=>0, 2=>0, 3=>4, _=>2});
+	// let lines = line_container.flatten_filter(match round {0=>0, 1=>0, 2=>0, 3=>0, _=>0});
 
 	// let points = point_quadtree.flatten_filter(match round {0..=1=>0, 2=>2, 3=>16, _=>144});
 	// let lines = line_container.flatten_filter(match round {0..=1=>0, 2=>0, 3=>6, _=>12});
@@ -64,30 +59,30 @@ fn make_round (
 	// let mut new_lines: Vec<(Line, u64)> = Vec::new();
 	let mut new_line_container: LineContainer = make_line_container();
 	// 1. compute all axioms for this round
-	// make::make_axiom1(&points, line_container, &mut new_line_container);
-	// make::make_axiom2(&points, line_container, &mut new_line_container);
-	make::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
-	make::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
-	// make::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
-	make::make_axiom7(&points, &lines, line_container, &mut new_line_container, boundary);
-	// make::make_axiom5(&pts_ax5, &lns_ax5, line_container, &mut new_line_container, boundary);
-	// // make::shortcut_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
-	// make::make_axiom6(&pts_ax6, &lns_ax6, line_container, &mut new_line_container, boundary);
-	// make::make_axiom7(&pts_ax7, &lns_ax7, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom1(&points, line_container, &mut new_line_container);
+	// fold::make_axiom2(&points, line_container, &mut new_line_container);
+	fold::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom7(&points, &lines, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom5(&pts_ax5, &lns_ax5, line_container, &mut new_line_container, boundary);
+	// // fold::shortcut_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom6(&pts_ax6, &lns_ax6, line_container, &mut new_line_container, boundary);
+	// fold::make_axiom7(&pts_ax7, &lns_ax7, line_container, &mut new_line_container, boundary);
 	// todo: list more axioms
 	// 2. compute new intersection points
-	// let mut new_points: Vec<(Vector, u64)> = if make_pts { make::make_intersections(
+	// let mut new_points: Vec<(Vector, u64)> = if make_pts { fold::make_intersections(
 	// 	points, &mut new_lines) } else { Vec::new() };
-	// let mut new_points: Vec<(Vector, u64)> = make::make_intersections(
+	// let mut new_points: Vec<(Vector, u64)> = fold::make_intersections(
 	// 	points, &mut new_lines);
 
 	let new_lines = new_line_container.flatten();
 	let old_lines = line_container.flatten();
 
-	// let mut new_points: QuadTree = make::make_intersections(
+	// let mut new_points: QuadTree = fold::make_intersections(
 	// 	point_quadtree, &old_lines, &new_lines, boundary);
-	let mut new_points: QuadTree = if round < 2 {
-		make::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
+	let mut new_points: QuadTree = if round < 3 {
+		fold::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
 	} else { make_tree() };
 
 	// point_quadtree, lines, &mut new_lines, boundary);
@@ -102,14 +97,14 @@ fn main () {
 
 	// the initial geometry from which all folds will be made
 	let mut points: QuadTree = make_tree();
-	let mut lines: LineContainer = make_line_container();
+	let mut lines: LineContainer = make_line_container();	
 	points.push(&Vector { x: 0.0, y: 0.0 });
 	points.push(&Vector { x: 1.0, y: 0.0 });
 	points.push(&Vector { x: 1.0, y: 1.0 });
 	points.push(&Vector { x: 0.0, y: 1.0 });
 	unit_square.sides.iter().for_each(|side| lines.push(side));
 
-	for round in 0..3 {
+	for round in 0..4 {
 		make_round(round, &mut points, &mut lines, &unit_square);
 		println!("done round {} ({} lines {} points)", round + 1, lines.len(), points.len());
 		// 	because some lines are being made outside of the square, we need to filter
@@ -136,7 +131,4 @@ fn main () {
 	println!("finished. {} lines, {} segments, {} points",
 		lines.len(), segments.len(), points.len());
 	
-	// make rust not complain about unused functions
-	run_tests();
 }
-

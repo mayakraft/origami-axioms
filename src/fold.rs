@@ -1,9 +1,9 @@
-use Vector;
-use Line;
-use Rect;
-use QuadTree;
-use make_tree;
-use LineContainer;
+pub mod quadtree;
+pub mod linecontainer;
+
+use math::Vector;
+use math::Line;
+use math::Rect;
 use axioms::axiom1;
 use axioms::axiom2;
 use axioms::axiom3;
@@ -11,9 +11,12 @@ use axioms::axiom4;
 use axioms::axiom5;
 use axioms::axiom6;
 use axioms::axiom7;
-// use random::Rand;
 
-const DEBUG: bool = false;
+pub use self::quadtree::QuadTree;
+pub use self::quadtree::make_tree;
+pub use self::linecontainer::LineContainer;
+
+const DEBUG: bool = true;
 
 pub fn make_intersections (
 	points: &mut QuadTree, // already existing intersection points

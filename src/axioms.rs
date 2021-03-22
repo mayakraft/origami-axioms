@@ -1,9 +1,9 @@
 // this source includes a cubic solver
 // ported from Robert Lang's Reference Finder
 // http://langorigami.com
-use Vector;
-use Line;
-use Rect;
+use math::Vector;
+use math::Line;
+use math::Rect;
 
 const EPSILON: f64 = 1.0e-8;
 
@@ -59,15 +59,20 @@ pub fn axiom3 (a: &Line, b: &Line, boundary: &Rect) -> Vec<Line> {
 pub fn axiom4 (a: &Vector, b: &Line, boundary: &Rect) -> Vec<Line> {
 	let u = b.u.rotate90();
 	let d = a.dot(&u);
+	let solution = Line {u, d};
 	// test the line before we return it
 	// shortest distance between the input point and the input line
 	let dist = b.d - a.dot(&b.u);
 	// dist as a vector, from the point to the line
 	let vector = u.scale(dist);
 	let point = a.add(&vector);
-	let valid = boundary.contains(&point);
-	// todo more tests is needed, axiom 4 is generating lines outside the boundary
-	return if valid { vec![Line { u, d }] } else { vec![] }
+	// 1. the point along the paralle line must be visible
+	// 2. prevent lines external and collinear to boundary point
+	let test1 = boundary.contains(&point);
+	// todo: I suspect there might be a simpler way to check this
+	//   without calling clip.
+	let (test2, _segment) = boundary.clip(&solution);
+	return if test1 && test2 { vec![solution] } else { vec![] }
 }
 
 // p1 is the point the line will pass through (does not move)

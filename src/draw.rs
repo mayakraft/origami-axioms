@@ -1,14 +1,13 @@
 use std::fs::File;
 // use std::fs;
 use std::io::prelude::*;
-use Vector;
-use Segment;
+use math::Vector;
+use math::Segment;
 
 const STROKE_W: f64 = 0.0002;
-const RADIUS: f64 = 0.002;
+const RADIUS: f64 = 0.001;
 
-// const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"907px\" height=\"907px\">\n";
-const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"600px\" height=\"600px\">\n";
+const SVG_HEADER: &str= "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-0.01 -0.01 1.02 1.02\" width=\"907px\" height=\"907px\">\n";
 
 fn unit_square_boundary() -> String {
 	format!("<g stroke=\"white\" stroke-width=\"{}\" stroke-opacity=\"1.0\">\n<line x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" />\n<line x1=\"1\" y1=\"0\" x2=\"1\" y2=\"1\" />\n<line x1=\"1\" y1=\"1\" x2=\"0\" y2=\"1\" />\n<line x1=\"0\" y1=\"1\" x2=\"0\" y2=\"0\" />\n</g>\n", STROKE_W)
@@ -59,7 +58,7 @@ fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 		// let opacity: f64 = pct.powf(0.6) * 0.75;
 		// let opacity: f64 = 0.03 + 0.15 * (pct.powf(0.3);
 		// let opacity: f64 = pct.powf(0.33);
-		let opacity: f64 = pct.powf(0.66);
+		let opacity: f64 = pct.powf(0.75);
 		string.push_str("<line ");
 		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
 		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));

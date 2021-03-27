@@ -16,8 +16,8 @@ pub use axioms::axiom5;
 pub use axioms::axiom6;
 pub use axioms::axiom7;
 
-pub use fold::quadtree::QuadTree;
-pub use fold::quadtree::make_tree;
+pub use fold::gridvec::GridVec;
+pub use fold::gridvec::make_grid;
 pub use fold::linecontainer::LineContainer;
 pub use fold::linecontainer::make_line_container;
 

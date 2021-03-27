@@ -4,15 +4,15 @@ use origami_axioms::math::Vector;
 use origami_axioms::math::Rect;
 use origami_axioms::math::make_square;
 use origami_axioms::fold;
-use origami_axioms::QuadTree;
-use origami_axioms::make_tree;
+use origami_axioms::GridVec;
+use origami_axioms::make_grid;
 use origami_axioms::LineContainer;
 use origami_axioms::make_line_container;
 
 // use make_line_container;
-// use make_tree;
+// use make_grid;
 // use fold;
-// use QuadTree;
+// use GridVec;
 // use LineContainer;
 
 // const EPSILON: f64 = f64::EPSILON * 10.0;
@@ -26,7 +26,7 @@ use origami_axioms::make_line_container;
 #[test]
 fn make_axiom_tests () {
 	let boundary: Rect = make_square();
-	let mut point_quadtree: QuadTree = make_tree();
+	let mut point_quadtree: GridVec = make_grid();
 	let mut line_container: LineContainer = make_line_container();
 	point_quadtree.push(&Vector { x: 0.0, y: 0.0 });
 	point_quadtree.push(&Vector { x: 1.0, y: 0.0 });
@@ -48,6 +48,6 @@ fn make_axiom_tests () {
 	fold::make_axiom7(&points, &lines, &mut line_container, &mut new_line_container, &boundary);
 	let new_lines = new_line_container.flatten();
 	let old_lines = line_container.flatten();
-	let _new_points: QuadTree = fold::make_intersections(
+	let _new_points: GridVec = fold::make_intersections(
 		&mut point_quadtree, &old_lines, &new_lines, &boundary);
 }

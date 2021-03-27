@@ -6,15 +6,15 @@ use origami_axioms::math::Segment;
 use origami_axioms::math::Rect;
 use origami_axioms::math::make_square;
 use origami_axioms::fold;
-use origami_axioms::QuadTree;
-use origami_axioms::make_tree;
+use origami_axioms::GridVec;
+use origami_axioms::make_grid;
 use origami_axioms::LineContainer;
 use origami_axioms::make_line_container;
 use origami_axioms::draw::draw;
 
 fn make_round (
 	round: usize,
-	point_quadtree: &mut QuadTree,
+	point_quadtree: &mut GridVec,
 	line_container: &mut LineContainer,
 	boundary: &Rect
 ) {
@@ -79,11 +79,11 @@ fn make_round (
 	let new_lines = new_line_container.flatten();
 	let old_lines = line_container.flatten();
 
-	// let mut new_points: QuadTree = fold::make_intersections(
+	// let mut new_points: GridVec = fold::make_intersections(
 	// 	point_quadtree, &old_lines, &new_lines, boundary);
-	let mut new_points: QuadTree = if round < 3 {
+	let mut new_points: GridVec = if round < 3 {
 		fold::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
-	} else { make_tree() };
+	} else { make_grid() };
 
 	// point_quadtree, lines, &mut new_lines, boundary);
 	// 3. merge points and lines from this new round
@@ -96,7 +96,7 @@ fn main () {
 	let unit_square: Rect = make_square();
 
 	// the initial geometry from which all folds will be made
-	let mut points: QuadTree = make_tree();
+	let mut points: GridVec = make_grid();
 	let mut lines: LineContainer = make_line_container();	
 	points.push(&Vector { x: 0.0, y: 0.0 });
 	points.push(&Vector { x: 1.0, y: 0.0 });
@@ -104,7 +104,7 @@ fn main () {
 	points.push(&Vector { x: 0.0, y: 1.0 });
 	unit_square.sides.iter().for_each(|side| lines.push(side));
 
-	for round in 0..4 {
+	for round in 0..1 {
 		make_round(round, &mut points, &mut lines, &unit_square);
 		println!("done round {} ({} lines {} points)", round + 1, lines.len(), points.len());
 		// 	because some lines are being made outside of the square, we need to filter
@@ -121,14 +121,13 @@ fn main () {
 	let mut marks: Vec<&(Vector, u64)> = points.flatten();
 	segments.sort_by_key(|el| el.1);
 	marks.sort_by_key(|el| el.1);
-	
+
 	draw(&segments, &marks);
 
 	// for i in 0..segments.len() {
 	//     println!("{}: {:?}", i, segments[i]);
 	// }
-	
+
 	println!("finished. {} lines, {} segments, {} points",
 		lines.len(), segments.len(), points.len());
-	
 }

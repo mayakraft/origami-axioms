@@ -60,11 +60,12 @@ fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 		// let opacity: f64 = pct.powf(0.33);
 		let opacity: f64 = pct.powf(0.75);
 		string.push_str("<line ");
-		string.push_str(&format!("x1=\"{}\" ", segments[i].0.a.x));
-		string.push_str(&format!("y1=\"{}\" ", segments[i].0.a.y));
-		string.push_str(&format!("x2=\"{}\" ", segments[i].0.b.x));
-		string.push_str(&format!("y2=\"{}\" ", segments[i].0.b.y));
-		string.push_str(&format!("stroke-opacity=\"{}\" ", opacity));
+		string.push_str(&format!("count=\"{}\" ", segments[i].1));
+		string.push_str(&format!("x1=\"{:.8}\" ", segments[i].0.a.x));
+		string.push_str(&format!("y1=\"{:.8}\" ", segments[i].0.a.y));
+		string.push_str(&format!("x2=\"{:.8}\" ", segments[i].0.b.x));
+		string.push_str(&format!("y2=\"{:.8}\" ", segments[i].0.b.y));
+		string.push_str(&format!("stroke-opacity=\"{:.4}\" ", opacity));
 		// string.push_str(&format!("stroke=\"rgb({},{},{})\" ", gray, gray, gray));
 		// string.push_str(&format!("stroke=\"hsl({}, 85%, 45%)\" ", hue));
 		string.push_str("/>\n");
@@ -108,8 +109,8 @@ fn write(filename: String, data: &String) -> std::io::Result<()> {
 }
 
 pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&(Vector, u64)>) {
+	println!("DRAW");
 	// fs::create_dir_all("/images")?;
 	let _res_p = write("points.svg".to_string(), &svg_points(points));
 	let _res_l = write("lines.svg".to_string(), &svg_lines(segments));
 }
-

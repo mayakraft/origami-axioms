@@ -84,8 +84,8 @@ impl LineContainer {
 		}
 		return count;
 	}
-	// pub fn filter_by_count (&self, count: u64) -> QuadTree {
-	// 	let mut tree: QuadTree = make_tree();
+	// pub fn filter_by_count (&self, count: u64) -> GridVec {
+	// 	let mut tree: GridVec = make_tree();
 	// 	for i in 0..self.buckets.len() {
 	// 		for j in 0..self.buckets[i].len() {
 	// 			for k in 0..self.buckets[i][j].len() {

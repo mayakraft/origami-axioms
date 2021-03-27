@@ -1,4 +1,4 @@
-pub mod quadtree;
+pub mod gridvec;
 pub mod linecontainer;
 
 use math::Vector;
@@ -12,19 +12,19 @@ use axioms::axiom5;
 use axioms::axiom6;
 use axioms::axiom7;
 
-pub use self::quadtree::QuadTree;
-pub use self::quadtree::make_tree;
+pub use self::gridvec::GridVec;
+pub use self::gridvec::make_grid;
 pub use self::linecontainer::LineContainer;
 
 const DEBUG: bool = true;
 
 pub fn make_intersections (
-	points: &mut QuadTree, // already existing intersection points
+	points: &mut GridVec, // already existing intersection points
 	old_lines: &Vec<(Line, u64)>, // all lines from previous rounds
 	new_lines: &Vec<(Line, u64)>, // the newest set of lines
 	polygon: &Rect
-) -> QuadTree {
-	let mut round: QuadTree = make_tree();
+) -> GridVec {
+	let mut round: GridVec = make_grid();
 	// concat new and old lines into one list "all_lines"
 	let mut all_lines: Vec<(Line, u64)> = Vec::new();
 	for i in 0..new_lines.len() { all_lines.push(new_lines[i]) }

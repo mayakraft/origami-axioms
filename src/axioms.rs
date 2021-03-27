@@ -44,11 +44,13 @@ pub fn axiom3 (a: &Line, b: &Line, boundary: &Rect) -> Vec<Line> {
 	// are the solutions inside the page
 	let inside_test: Vec<bool> = solutions.iter()
 		.map(|line| boundary.clip(&line).0)
+		// .map(|seg| true) // testing: ignore this check
 		.collect();
 	// seg_a will be the only one reflected
 	let reflect_test: Vec<bool> = solutions.iter()
 		.map(|l| l.reflect_segment(&seg_a.1))
 		.map(|seg| seg.quick_overlap(&seg_b.1))
+		// .map(|seg| true) // testing: ignore this check
 		.collect();
 	return solutions.iter().enumerate()
 		.filter(|(i, _line)| inside_test[*i] && reflect_test[*i])

@@ -1,33 +1,33 @@
-pub mod gridvec;
-// pub mod quadtree;
-pub mod linecontainer;
+use rabbit_ear as ear;
+use self::ear::Rect;
+use self::ear::axioms::axiom1;
+use self::ear::axioms::axiom2;
+use self::ear::axioms::axiom3;
+use self::ear::axioms::axiom4;
+use self::ear::axioms::axiom5;
+use self::ear::axioms::axiom6;
+use self::ear::axioms::axiom7;
+use super::GridVec;
+use super::make_grid;
+// use super::QuadTree;
+// use super::make_tree;
+use super::LineContainer;
 
-use math::Vector;
-use math::Line;
-use math::Rect;
-use axioms::axiom1;
-use axioms::axiom2;
-use axioms::axiom3;
-use axioms::axiom4;
-use axioms::axiom5;
-use axioms::axiom6;
-use axioms::axiom7;
-
-pub use self::gridvec::GridVec;
-pub use self::gridvec::make_grid;
-pub use self::linecontainer::LineContainer;
+use super::CountPoint;
+use super::CountLine;
 
 const DEBUG: bool = true;
+const VERBOSE: bool = false;
 
 pub fn make_intersections (
 	points: &mut GridVec, // already existing intersection points
-	old_lines: &Vec<(Line, u64)>, // all lines from previous rounds
-	new_lines: &Vec<(Line, u64)>, // the newest set of lines
-	polygon: &Rect
+	old_lines: &Vec<CountLine>, // all lines from previous rounds
+	new_lines: &Vec<CountLine>, // the newest set of lines
+	polygon: Rect
 ) -> GridVec {
 	let mut round: GridVec = make_grid();
 	// concat new and old lines into one list "all_lines"
-	let mut all_lines: Vec<(Line, u64)> = Vec::new();
+	let mut all_lines: Vec<CountLine> = Vec::new();
 	for i in 0..new_lines.len() { all_lines.push(new_lines[i]) }
 	for i in 0..old_lines.len() { all_lines.push(old_lines[i]) }
 	// if this message prints, the for loop j in (i+1) will start beyond all_lines. needs fix
@@ -36,63 +36,78 @@ pub fn make_intersections (
 	// this compares every new line to every new AND old line, but avoids
 	// old lines getting compared to themselves again (which already happened)
 	if new_lines.len() == 0 { return round }
+	// println!("starting loop");
 	for i in 0..new_lines.len() {
-		if DEBUG { println!("{}/{}: {} new points", i, new_lines.len(), round.len()); }
+		if DEBUG && VERBOSE { println!("{}/{} new points", i, new_lines.len()); }
+		// if DEBUG { println!("{}/{}: {} new points", i, new_lines.len(), round.len()); }
 		for j in (i + 1)..all_lines.len() {
-			let (success, point) = new_lines[i].0.intersect(&all_lines[j].0);
+			let (success, point) = new_lines[i].0.intersect(all_lines[j].0);
 			if !success { continue }
-			if !polygon.contains(&point) { continue }
+			if !polygon.contains(point) { continue }
 			if points.increment_match(&point) { continue }
 			if round.increment_match(&point) { continue }
-			round.push(&point); // automatically makes tuple (point, 1)
+			// round.push(&point); // automatically makes tuple (point, 1)
+			round.push(point); // automatically makes tuple (point, 1)
+			// round.push((point, 1)); // automatically makes tuple (point, 1)
 		}
 	}
+	if DEBUG { println!("intersections done. {} new points this round", round.len()); }
 	return round;
 }
 
+// these parameters are pointers, because all these methods are called
+// in sequence, preventing variable moving, allowing reuse
 pub fn make_axiom1 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
+	points: &Vec<CountPoint>, // the previous round of points (build from this)
 	old_lines: &mut LineContainer, // the previous round of lines (build from this)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
+	boundary: Rect
 ) {
 	for i in 0..points.len() - 1 {
-		if DEBUG { println!("{}/{}: {} axiom 1", i, points.len(), new_lines.len()); }
+		if DEBUG && VERBOSE { println!("{}/{}: {} axiom 1", i, points.len(), new_lines.len()); }
 		for j in (i + 1)..points.len() {
-			let line: Line = axiom1(&points[i].0, &points[j].0);
-			if old_lines.increment_match(&line) { continue }
-			if new_lines.increment_match(&line) { continue }
-			new_lines.push(&line);
+			let solutions = axiom1(points[i].0, points[j].0, boundary);
+			for k in 0..solutions.len() {
+				if old_lines.increment_match(&solutions[k]) { continue }
+				if new_lines.increment_match(&solutions[k]) { continue }
+				new_lines.push(&solutions[k]);
+			}
 		}
 	}
+	if DEBUG { println!("axiom 1 done. {} lines this round", new_lines.len()); }
 }
 
 pub fn make_axiom2 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
+	points: &Vec<CountPoint>, // the previous round of points (build from this)
 	old_lines: &mut LineContainer, // the previous round of lines (build from this)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
+	boundary: Rect
 ) {
 	for i in 0..points.len() - 1 {
-		if DEBUG { println!("{}/{}: {} axiom 2", i, points.len(), new_lines.len()); }
+		if DEBUG && VERBOSE { println!("{}/{}: {} axiom 2", i, points.len(), new_lines.len()); }
 		for j in (i + 1)..points.len() {
-			let line: Line = axiom2(&points[i].0, &points[j].0);
-			if old_lines.increment_match(&line) { continue }
-			if new_lines.increment_match(&line) { continue }
-			new_lines.push(&line);
+			let solutions = axiom2(points[i].0, points[j].0, boundary);
+			for k in 0..solutions.len() {
+				if old_lines.increment_match(&solutions[k]) { continue }
+				if new_lines.increment_match(&solutions[k]) { continue }
+				new_lines.push(&solutions[k]);
+			}
 		}
 	}
+	if DEBUG { println!("axiom 2 done. {} lines this round", new_lines.len()); }
 }
 
 pub fn make_axiom3 (
-	_points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+	_points: &Vec<CountPoint>, // the previous round of points (build from this)
+	lines: &Vec<CountLine>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-	boundary: &Rect
+	boundary: Rect
 ) {
 	for i in 0..lines.len() - 1 {
-		if DEBUG { println!("{}/{}: {} axiom 3", i, lines.len(), new_lines.len()); }
+		if DEBUG && VERBOSE { println!("{}/{}: {} axiom 3", i, lines.len(), new_lines.len()); }
 		for j in (i + 1)..lines.len() {
-			let solutions = axiom3(&lines[i].0, &lines[j].0, boundary);
+			let solutions = axiom3(lines[i].0, lines[j].0, boundary);
 			for k in 0..solutions.len() {
 				if old_lines.increment_match(&solutions[k]) { continue }
 				if new_lines.increment_match(&solutions[k]) { continue }
@@ -100,19 +115,20 @@ pub fn make_axiom3 (
 			}
 		}
 	}
+	if DEBUG { println!("axiom 3 done. {} lines this round", new_lines.len()); }
 }
 
 pub fn make_axiom4 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+	points: &Vec<CountPoint>, // the previous round of points (build from this)
+	lines: &Vec<CountLine>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-	boundary: &Rect
+	boundary: Rect
 ) {
 	for i in 0..points.len() {
-		if DEBUG { println!("{}/{}: {} axiom 4", i, points.len(), new_lines.len()); }
+		if DEBUG && VERBOSE { println!("{}/{}: {} axiom 4", i, points.len(), new_lines.len()); }
 		for j in 0..lines.len() {
-			let solutions = axiom4(&points[i].0, &lines[j].0, boundary);
+			let solutions = axiom4(points[i].0, lines[j].0, boundary);
 			for k in 0..solutions.len() {
 				if old_lines.increment_match(&solutions[k]) { continue }
 				if new_lines.increment_match(&solutions[k]) { continue }
@@ -120,21 +136,22 @@ pub fn make_axiom4 (
 			}
 		}
 	}
+	if DEBUG { println!("axiom 4 done. {} lines this round", new_lines.len()); }
 }
 
 pub fn make_axiom5 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+	points: &Vec<CountPoint>, // the previous round of points (build from this)
+	lines: &Vec<CountLine>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-	boundary: &Rect
+	boundary: Rect
 ) {
 	for i in 0..points.len() {
 		for j in 0..points.len() {
 			if i == j { continue }
-			if DEBUG { println!("{}/{}: {} axiom 5", i, points.len(), new_lines.len()); }
+			if DEBUG && VERBOSE { println!("{}/{}: {} axiom 5", i, points.len(), new_lines.len()); }
 			for k in 0..lines.len() {
-				let solutions = axiom5(&points[i].0, &points[j].0, &lines[k].0, boundary);
+				let solutions = axiom5(points[i].0, points[j].0, lines[k].0, boundary);
 				for l in 0..solutions.len() {
 					if old_lines.increment_match(&solutions[l]) { continue }
 					if new_lines.increment_match(&solutions[l]) { continue }
@@ -143,23 +160,24 @@ pub fn make_axiom5 (
 			}
 		}
 	}
+	if DEBUG { println!("axiom 5 done. {} lines this round", new_lines.len()); }
 }
 
 pub fn make_axiom6 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+	points: &Vec<CountPoint>, // the previous round of points (build from this)
+	lines: &Vec<CountLine>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-	boundary: &Rect
+	boundary: Rect
 ) {
 	for i in 0..points.len() {
 		for j in 0..points.len() {
-			if DEBUG { println!("{}/{}pts: ({}pt): {} axiom 6", i, points.len(), j, new_lines.len()); }
+			if DEBUG && VERBOSE { println!("{}/{}pts: ({}pt): {} axiom 6", i, points.len(), j, new_lines.len()); }
 			if i == j { continue }
 			for k in 0..lines.len() {
 				for l in 0..lines.len() {
 					if k == l { continue }
-					let solutions = axiom6(&points[i].0, &points[j].0, &lines[k].0, &lines[l].0, boundary);
+					let solutions = axiom6(points[i].0, points[j].0, lines[k].0, lines[l].0, boundary);
 					for m in 0..solutions.len() {
 						if old_lines.increment_match(&solutions[m]) { continue }
 						if new_lines.increment_match(&solutions[m]) { continue }
@@ -169,14 +187,15 @@ pub fn make_axiom6 (
 			}
 		}
 	}
+	if DEBUG { println!("axiom 6 done. {} lines this round", new_lines.len()); }
 }
 
 // pub fn shortcut_axiom6 (
-// 	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-// 	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+// 	points: &Vec<CountPoint>, // the previous round of points (build from this)
+// 	lines: &Vec<CountLine>, // the previous round of lines as list (build from this)
 // 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
 // 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-// 	boundary: &Rect
+// 	boundary: Rect
 // ) {
 // 	let mut rand = Rand::new(0);
 // 	let steps: usize = 15;
@@ -204,7 +223,7 @@ pub fn make_axiom6 (
 // 					if jj >= points.len() { jj = j }
 // 					if kk >= lines.len() { kk = k }
 // 					if ll >= lines.len() { ll = l }
-// 					let solutions = axiom6(&points[ii].0, &points[jj].0, &lines[kk].0, &lines[ll].0, boundary);
+// 					let solutions = axiom6(points[ii].0, &points[jj].0, &lines[kk].0, &lines[ll].0, boundary);
 // 					for m in 0..solutions.len() {
 // 						if old_lines.increment_match(&solutions[m]) { continue }
 // 						if new_lines.increment_match(&solutions[m]) { continue }
@@ -217,18 +236,18 @@ pub fn make_axiom6 (
 // }
 
 pub fn make_axiom7 (
-	points: &Vec<&(Vector, u64)>, // the previous round of points (build from this)
-	lines: &Vec<(Line, u64)>, // the previous round of lines as list (build from this)
+	points: &Vec<CountPoint>, // the previous round of points (build from this)
+	lines: &Vec<CountLine>, // the previous round of lines as list (build from this)
 	old_lines: &mut LineContainer, // the previous round (check for duplicates only)
 	new_lines: &mut LineContainer, // the current round (check for duplicates only)
-	boundary: &Rect
+	boundary: Rect
 ) {
 	for i in 0..points.len() {
 		for j in 0..lines.len() {
-			if DEBUG { println!("{}/{}: {} axiom 7", i, points.len(), new_lines.len()); }
+			if DEBUG && VERBOSE { println!("{}/{}: {} axiom 7", i, points.len(), new_lines.len()); }
 			for k in 0..lines.len() {
 				if j == k { continue }
-				let solutions = axiom7(&points[i].0, &lines[j].0, &lines[k].0, boundary);
+				let solutions = axiom7(points[i].0, lines[j].0, lines[k].0, boundary);
 				for l in 0..solutions.len() {
 					if old_lines.increment_match(&solutions[l]) { continue }
 					if new_lines.increment_match(&solutions[l]) { continue }
@@ -237,5 +256,5 @@ pub fn make_axiom7 (
 			}
 		}
 	}
+	if DEBUG { println!("axiom 7 done. {} lines this round", new_lines.len()); }
 }
-

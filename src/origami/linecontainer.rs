@@ -1,4 +1,5 @@
-use math::Line;
+use rabbit_ear as ear;
+use self::ear::Line;
 
 const BUCKET: usize = 10000;
 const BUCKET_F: f64 = 10000.0;
@@ -27,7 +28,7 @@ pub fn make_line_container () -> LineContainer {
 
 // fn duplicate_line_check (line: &Line, lines: &mut Vec<(Line, u64)>) -> bool {
 // 	for k in 0..lines.len() {
-// 		if line.equivalent(&lines[k].0) {
+// 		if line.equivalent(lines[k].0) {
 // 			lines[k].1 += 1;
 // 			return true;
 // 		}
@@ -45,7 +46,7 @@ impl LineContainer {
 		let idx = point_to_index(line);
 		let bucket = &mut self.buckets[idx];
 		for i in 0..bucket.len() {
-			if line.equivalent(&bucket[i].0) {
+			if line.equivalent(bucket[i].0) {
 				bucket[i].1 += 1;
 				return true;
 			}

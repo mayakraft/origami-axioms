@@ -1,8 +1,9 @@
 use std::fs::File;
 // use std::fs;
 use std::io::prelude::*;
-use math::Vector;
-use math::Segment;
+use rabbit_ear as ear;
+use self::ear::Vector;
+use self::ear::Segment;
 
 const STROKE_W: f64 = 0.0002;
 const RADIUS: f64 = 0.001;
@@ -13,16 +14,28 @@ fn unit_square_boundary() -> String {
 	format!("<g stroke=\"white\" stroke-width=\"{}\" stroke-opacity=\"1.0\">\n<line x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\" />\n<line x1=\"1\" y1=\"0\" x2=\"1\" y2=\"1\" />\n<line x1=\"1\" y1=\"1\" x2=\"0\" y2=\"1\" />\n<line x1=\"0\" y1=\"1\" x2=\"0\" y2=\"0\" />\n</g>\n", STROKE_W)
 }
 
-fn circle_elements (points: &Vec<&(Vector, u64)>) -> String {
+fn scale_float (opacity: f64) -> f64 {
+	opacity.powf(0.1)
+	// opacity.powf(0.333)
+	// opacity.powf(0.333) * 0.666 + 0.333
+	// let opacity: f64 = pct.powf(0.4) * 0.8;
+	// let opacity: f64 = pct.powf(0.6) * 0.75;
+	// let opacity: f64 = 0.03 + 0.15 * (pct.powf(0.3);
+	// let opacity: f64 = pct.powf(0.75);
+}
+
+fn circle_elements (points: &Vec<(Vector, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	// get the largest repeat value. scale all others in relation to this
-	let mut repeat_max_f: u64 = 0;
+	let mut repeat_max_u64: u64 = 0;
 	for i in 0..points.len() {
-		if points[i].1 > repeat_max_f { repeat_max_f = points[i].1; }
+		if points[i].1 > repeat_max_u64 { repeat_max_u64 = points[i].1; }
 	}
-	let repeat_max: f64 = repeat_max_f as f64;
+	let repeat_max: f64 = repeat_max_u64 as f64;
+	println!("one point appears {} times. lowest opacity: {}", repeat_max_u64, scale_float(1.0/repeat_max));
 	for i in 0..points.len() {
-		let opacity: f64 = ((points[i].1 as f64) / repeat_max).powf(0.15);
+		let pct: f64 = (points[i].1 as f64) / repeat_max; // (0.0, 1.0]
+		let opacity: f64 = scale_float(pct);
 		let mut string: String = String::new();
 		string.push_str("<circle ");
 		string.push_str(&format!("cx=\"{}\" ", points[i].0.x));
@@ -39,26 +52,22 @@ fn circle_elements (points: &Vec<&(Vector, u64)>) -> String {
 	return string;
 }
 
-
 fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	// get the largest repeat value. scale all others in relation to this
-	let mut repeat_max_f: u64 = 0;
+	let mut repeat_max_u64: u64 = 0;
 	for i in 0..segments.len() {
-		if segments[i].1 > repeat_max_f { repeat_max_f = segments[i].1; }
+		if segments[i].1 > repeat_max_u64 { repeat_max_u64 = segments[i].1; }
 	}
-	let repeat_max: f64 = repeat_max_f as f64;
+	let repeat_max: f64 = repeat_max_u64 as f64;
+	println!("one line appears {} times. lowest opacity: {}", repeat_max_u64, scale_float(1.0/repeat_max));
 	for i in 0..segments.len() {
-		let mut string: String = String::new();
 		let pct: f64 = (segments[i].1 as f64) / repeat_max; // (0.0, 1.0]
 		// let pct2: f64 = ((segments[i].1 - 1) as f64) / repeat_max;  // [0.0, 1.0)
 		// let gray: u8 = (255.0 * pct.powf(0.33)).floor() as u8;
 		// let hue: u8 = (pct2 * 300.0) as u8;
-		// let opacity: f64 = pct.powf(0.4) * 0.8;
-		// let opacity: f64 = pct.powf(0.6) * 0.75;
-		// let opacity: f64 = 0.03 + 0.15 * (pct.powf(0.3);
-		// let opacity: f64 = pct.powf(0.33);
-		let opacity: f64 = pct.powf(0.75);
+		let opacity: f64 = scale_float(pct);
+		let mut string: String = String::new();
 		string.push_str("<line ");
 		string.push_str(&format!("count=\"{}\" ", segments[i].1));
 		string.push_str(&format!("x1=\"{:.8}\" ", segments[i].0.a.x));
@@ -90,7 +99,7 @@ pub fn svg_lines(segments: &Vec<(Segment, u64)>) -> String {
 	return svg;
 }
 
-pub fn svg_points(points: &Vec<&(Vector, u64)>) -> String {
+pub fn svg_points(points: &Vec<(Vector, u64)>) -> String {
 	let mut svg: String = String::new();
 	svg.push_str(&SVG_HEADER.to_string());
 	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
@@ -108,7 +117,7 @@ fn write(filename: String, data: &String) -> std::io::Result<()> {
 	Ok(())
 }
 
-pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<&(Vector, u64)>) {
+pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<(Vector, u64)>) {
 	println!("DRAW");
 	// fs::create_dir_all("/images")?;
 	let _res_p = write("points.svg".to_string(), &svg_points(points));

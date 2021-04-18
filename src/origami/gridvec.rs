@@ -1,4 +1,6 @@
-use math::Vector;
+use rabbit_ear as ear;
+use self::ear::Vector;
+use origami::CountPoint;
 
 const BUCKET: usize = 1000;
 const BUCKET_MAX_I: usize = 999;
@@ -6,10 +8,10 @@ const BUCKET_F: f64 = 1000.0;
 
 // #[derive(Copy, Clone)]
 pub struct GridVec {
-	pub buckets: Vec<Vec<Vec<(Vector, u64)>>>
+	pub buckets: Vec<Vec<Vec<CountPoint>>>
 }
 
-fn point_to_index (point: &Vector) -> (usize, usize) {
+fn point_to_index (point: Vector) -> (usize, usize) {
 	let mut i: usize = (point.x * BUCKET_F).floor() as usize;
 	if i == BUCKET { i = BUCKET_MAX_I }
 	let mut j: usize = (point.y * BUCKET_F).floor() as usize;
@@ -18,12 +20,12 @@ fn point_to_index (point: &Vector) -> (usize, usize) {
 }
 
 pub fn make_grid () -> GridVec {
-	let mut buckets: Vec<Vec<Vec<(Vector, u64)>>> = Vec::new();
+	let mut buckets: Vec<Vec<Vec<CountPoint>>> = Vec::new();
 	for i in 0..BUCKET {
-		let row: Vec<Vec<(Vector, u64)>> = Vec::new();
+		let row: Vec<Vec<CountPoint>> = Vec::new();
 		buckets.push(row);
 		for _j in 0..BUCKET {
-			let col: Vec<(Vector, u64)> = Vec::new();
+			let col: Vec<CountPoint> = Vec::new();
 			buckets[i].push(col);
 		}
 	}
@@ -31,16 +33,16 @@ pub fn make_grid () -> GridVec {
 }
 
 impl GridVec {
-	pub fn push (&mut self, point: &Vector) {
+	pub fn push (&mut self, point: Vector) {
 		let idx = point_to_index(point);
-		self.buckets[idx.0][idx.1].push((*point, 1));
+		self.buckets[idx.0][idx.1].push((point, 1));
 	}
 	// return true if match found. false if no match
 	pub fn increment_match (&mut self, point: &Vector) -> bool {
-		let idx = point_to_index(point);
+		let idx = point_to_index(*point);
 		let bucket = &mut self.buckets[idx.0][idx.1];
 		for i in 0..bucket.len() {
-			if point.equivalent(&bucket[i].0) {
+			if point.equivalent(bucket[i].0) {
 				bucket[i].1 += 1;
 				return true;
 			}
@@ -54,19 +56,19 @@ impl GridVec {
 			}
 		}
 	}
-	pub fn flatten (&self) -> Vec<&(Vector, u64)> {
-		let mut list: Vec<&(Vector, u64)> = Vec::new();
+	pub fn flatten (&self) -> Vec<CountPoint> {
+		let mut list: Vec<CountPoint> = Vec::new();
 		for i in 0..self.buckets.len() {
 			for j in 0..self.buckets[i].len() {
 				for k in 0..self.buckets[i][j].len() {
-					list.push(&self.buckets[i][j][k]);
+					list.push(self.buckets[i][j][k]);
 				}
 			}
 		}
 		return list;
 	}
-	// pub fn flatten_filter (&self, count: u64) -> Vec<&(Vector, u64)> {
-	// 	let mut list: Vec<&(Vector, u64)> = Vec::new();
+	// pub fn flatten_filter (&self, count: u64) -> Vec<&CountPoint> {
+	// 	let mut list: Vec<&CountPoint> = Vec::new();
 	// 	for i in 0..self.buckets.len() {
 	// 		for j in 0..self.buckets[i].len() {
 	// 			for k in 0..self.buckets[i][j].len() {
@@ -78,6 +80,7 @@ impl GridVec {
 	// 	}
 	// 	return list;
 	// }
+
 	pub fn len (&self) -> usize {
 		let mut count: usize = 0;
 		for i in 0..self.buckets.len() {

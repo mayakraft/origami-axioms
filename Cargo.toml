@@ -1,6 +1,7 @@
 [package]
-name = "origami-axioms"
+name = "axiom-drawings"
 version = "0.1.0"
 authors = ["robbykraft <robbykraft@gmail.com>"]
 
 [dependencies]
+rabbit-ear = {path = "../origami"}

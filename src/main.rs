@@ -1,28 +1,31 @@
-extern crate origami_axioms;
+extern crate rabbit_ear;
+use rabbit_ear as ear;
+use ear::Vector;
+use ear::Line;
+use ear::Segment;
+use ear::Rect;
+use ear::make_square;
 
-use origami_axioms::math::Vector;
-use origami_axioms::math::Line;
-use origami_axioms::math::Segment;
-use origami_axioms::math::Rect;
-use origami_axioms::math::make_square;
-use origami_axioms::fold;
-use origami_axioms::GridVec;
-use origami_axioms::make_grid;
-use origami_axioms::LineContainer;
-use origami_axioms::make_line_container;
-use origami_axioms::draw::draw;
+mod origami;
+use origami::GridVec;
+use origami::make_grid;
+// use QuadTree;
+// use make_tree;
+use origami::LineContainer;
+use origami::linecontainer::make_line_container;
+use origami::draw::draw;
 
 fn make_round (
 	round: usize,
 	point_quadtree: &mut GridVec,
 	line_container: &mut LineContainer,
-	boundary: &Rect
+	boundary: Rect
 ) {
 	// all axioms will be built from function arguments points and lines
 	// from the previous round (make points into Vector from the quadtree)
-
 	let points = point_quadtree.flatten();
 	let lines = line_container.flatten();
+	println!("round start {} points, {} lines", points.len(), lines.len());
 	// let points = point_quadtree.flatten_filter(match round {0=>0, 1=>0, 2=>0, 3=>4, _=>2});
 	// let lines = line_container.flatten_filter(match round {0=>0, 1=>0, 2=>0, 3=>0, _=>0});
 
@@ -59,30 +62,31 @@ fn make_round (
 	// let mut new_lines: Vec<(Line, u64)> = Vec::new();
 	let mut new_line_container: LineContainer = make_line_container();
 	// 1. compute all axioms for this round
-	// fold::make_axiom1(&points, line_container, &mut new_line_container);
-	// fold::make_axiom2(&points, line_container, &mut new_line_container);
-	fold::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
-	// fold::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
-	// fold::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
-	// fold::make_axiom7(&points, &lines, line_container, &mut new_line_container, boundary);
-	// fold::make_axiom5(&pts_ax5, &lns_ax5, line_container, &mut new_line_container, boundary);
-	// // fold::shortcut_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
-	// fold::make_axiom6(&pts_ax6, &lns_ax6, line_container, &mut new_line_container, boundary);
-	// fold::make_axiom7(&pts_ax7, &lns_ax7, line_container, &mut new_line_container, boundary);
+	origami::make_axiom1(&points, line_container, &mut new_line_container, boundary);
+	origami::make_axiom2(&points, line_container, &mut new_line_container, boundary);
+	origami::make_axiom3(&points, &lines, line_container, &mut new_line_container, boundary);
+	origami::make_axiom4(&points, &lines, line_container, &mut new_line_container, boundary);
+	origami::make_axiom5(&points, &lines, line_container, &mut new_line_container, boundary);
+	origami::make_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
+	origami::make_axiom7(&points, &lines, line_container, &mut new_line_container, boundary);
+	// origami::make_axiom5(&pts_ax5, &lns_ax5, line_container, &mut new_line_container, boundary);
+	// // origami::shortcut_axiom6(&points, &lines, line_container, &mut new_line_container, boundary);
+	// origami::make_axiom6(&pts_ax6, &lns_ax6, line_container, &mut new_line_container, boundary);
+	// origami::make_axiom7(&pts_ax7, &lns_ax7, line_container, &mut new_line_container, boundary);
 	// todo: list more axioms
 	// 2. compute new intersection points
-	// let mut new_points: Vec<(Vector, u64)> = if make_pts { fold::make_intersections(
+	// let mut new_points: Vec<(Vector, u64)> = if make_pts { origami::make_intersections(
 	// 	points, &mut new_lines) } else { Vec::new() };
-	// let mut new_points: Vec<(Vector, u64)> = fold::make_intersections(
+	// let mut new_points: Vec<(Vector, u64)> = origami::make_intersections(
 	// 	points, &mut new_lines);
 
 	let new_lines = new_line_container.flatten();
 	let old_lines = line_container.flatten();
 
-	// let mut new_points: GridVec = fold::make_intersections(
+	// let mut new_points: GridVec = origami::make_intersections(
 	// 	point_quadtree, &old_lines, &new_lines, boundary);
 	let mut new_points: GridVec = if round < 3 {
-		fold::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
+		origami::make_intersections(point_quadtree, &old_lines, &new_lines, boundary)
 	} else { make_grid() };
 
 	// point_quadtree, lines, &mut new_lines, boundary);
@@ -91,6 +95,7 @@ fn make_round (
 	line_container.merge(&mut new_line_container);
 }
 
+
 fn main () {
 	// the boundary, all points and lines will be clipped inside
 	let unit_square: Rect = make_square();
@@ -98,27 +103,32 @@ fn main () {
 	// the initial geometry from which all folds will be made
 	let mut points: GridVec = make_grid();
 	let mut lines: LineContainer = make_line_container();	
-	points.push(&Vector { x: 0.0, y: 0.0 });
-	points.push(&Vector { x: 1.0, y: 0.0 });
-	points.push(&Vector { x: 1.0, y: 1.0 });
-	points.push(&Vector { x: 0.0, y: 1.0 });
+	points.push(Vector { x: 0.0, y: 0.0 });
+	points.push(Vector { x: 1.0, y: 0.0 });
+	points.push(Vector { x: 1.0, y: 1.0 });
+	points.push(Vector { x: 0.0, y: 1.0 });
 	unit_square.sides.iter().for_each(|side| lines.push(side));
 
-	for round in 0..1 {
-		make_round(round, &mut points, &mut lines, &unit_square);
-		println!("done round {} ({} lines {} points)", round + 1, lines.len(), points.len());
+	for round in 0..2 {
+		make_round(round, &mut points, &mut lines, unit_square);
+		// println!("done round {} ({} lines {} points)", round + 1, lines.len(), points.len());
 		// 	because some lines are being made outside of the square, we need to filter
 		// 	out lines based on if they become segments.
 	}
 
+	let flat_lines = lines.flatten();
+	let flat_points = points.flatten();
+
+	println!("finished, {} lines, {} points", flat_lines.len(), flat_points.len());
+
 	// temporarily put a tuple in a tuple
 	// (line, number_of_repeats, (clipping_success, segment))
-	let mut segments: Vec<(Segment, u64)> = lines.flatten().iter()
-		.map(|el: &(Line, u64)| (el.0, el.1, unit_square.clip(&el.0)))
+	let mut segments: Vec<(Segment, u64)> = flat_lines.iter()
+		.map(|el: &(Line, u64)| (el.0, el.1, unit_square.clip(el.0)))
 		.filter(|el: &(Line, u64, (bool, Segment))| (el.2).0)
 		.map(|el| ( (el.2).1, el.1) )
 		.collect();
-	let mut marks: Vec<&(Vector, u64)> = points.flatten();
+	let mut marks: Vec<(Vector, u64)> = flat_points;
 	segments.sort_by_key(|el| el.1);
 	marks.sort_by_key(|el| el.1);
 
@@ -128,6 +138,31 @@ fn main () {
 	//     println!("{}: {:?}", i, segments[i]);
 	// }
 
-	println!("finished. {} lines, {} segments, {} points",
-		lines.len(), segments.len(), points.len());
+	// println!("finished. {} lines, {} segments, {} points",
+	// 	lines.len(), segments.len(), points.len());
+
+
+	// // testing for quadtree
+	// let mut tree = make_grid();
+	// println!("tree before {} {}", tree.quadrants.len(), tree.points.len());
+	// tree.push(Vector { x: 0.5, y: 0.25 });
+	// tree.push(Vector { x: 1.0, y: 0.15 });
+	// tree.push(Vector { x: 0.5, y: 0.5 });
+	// tree.push(Vector { x: 0.5, y: 0.75 });
+	// tree.push(Vector { x: 0.75, y: 0.85 });
+	// tree.push(Vector { x: 1.0, y: 0.15 });
+	// println!("tree after {} {}", tree.quadrants.len(), tree.points.len());
+	// for i in 0..tree.quadrants.len() {
+	// 	println!("-- {} inside ({}) {}", i, tree.quadrants[i].quadrants.len(), tree.quadrants[i].points.len());
+	// }
+	// let points = tree.flatten();
+	// println!("all points, {}", points.len());
+	// for i in 0..points.len() {
+	// 	println!("{}: {:?}", i, points[i]);
+	// }
+
+	// println!("tree {:?}", tree);
+	// for i in 0..tree.quadrants.len() {
+	// 	println!("tree {} {:?}", i, tree.quadrants[i]);
+	// }
 }

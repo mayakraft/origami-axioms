@@ -70,7 +70,7 @@ pub fn make_axiom1 (
 			for k in 0..solutions.len() {
 				if old_lines.increment_match(&solutions[k]) { continue }
 				if new_lines.increment_match(&solutions[k]) { continue }
-				new_lines.push(&solutions[k]);
+				new_lines.push(&solutions[k], 1);
 			}
 		}
 	}
@@ -90,7 +90,7 @@ pub fn make_axiom2 (
 			for k in 0..solutions.len() {
 				if old_lines.increment_match(&solutions[k]) { continue }
 				if new_lines.increment_match(&solutions[k]) { continue }
-				new_lines.push(&solutions[k]);
+				new_lines.push(&solutions[k], 2);
 			}
 		}
 	}
@@ -111,7 +111,7 @@ pub fn make_axiom3 (
 			for k in 0..solutions.len() {
 				if old_lines.increment_match(&solutions[k]) { continue }
 				if new_lines.increment_match(&solutions[k]) { continue }
-				new_lines.push(&solutions[k]);
+				new_lines.push(&solutions[k], 3);
 			}
 		}
 	}
@@ -132,7 +132,7 @@ pub fn make_axiom4 (
 			for k in 0..solutions.len() {
 				if old_lines.increment_match(&solutions[k]) { continue }
 				if new_lines.increment_match(&solutions[k]) { continue }
-				new_lines.push(&solutions[k]);
+				new_lines.push(&solutions[k], 4);
 			}
 		}
 	}
@@ -155,7 +155,7 @@ pub fn make_axiom5 (
 				for l in 0..solutions.len() {
 					if old_lines.increment_match(&solutions[l]) { continue }
 					if new_lines.increment_match(&solutions[l]) { continue }
-					new_lines.push(&solutions[l]);
+					new_lines.push(&solutions[l], 5);
 				}
 			}
 		}
@@ -181,7 +181,7 @@ pub fn make_axiom6 (
 					for m in 0..solutions.len() {
 						if old_lines.increment_match(&solutions[m]) { continue }
 						if new_lines.increment_match(&solutions[m]) { continue }
-						new_lines.push(&solutions[m]);
+						new_lines.push(&solutions[m], 6);
 					}
 				}
 			}
@@ -251,7 +251,7 @@ pub fn make_axiom7 (
 				for l in 0..solutions.len() {
 					if old_lines.increment_match(&solutions[l]) { continue }
 					if new_lines.increment_match(&solutions[l]) { continue }
-					new_lines.push(&solutions[l]);
+					new_lines.push(&solutions[l], 7);
 				}
 			}
 		}

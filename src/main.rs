@@ -95,7 +95,6 @@ fn make_round (
 	line_container.merge(&mut new_line_container);
 }
 
-
 fn main () {
 	// the boundary, all points and lines will be clipped inside
 	let unit_square: Rect = make_square();
@@ -107,7 +106,7 @@ fn main () {
 	points.push(Vector { x: 1.0, y: 0.0 });
 	points.push(Vector { x: 1.0, y: 1.0 });
 	points.push(Vector { x: 0.0, y: 1.0 });
-	unit_square.sides.iter().for_each(|side| lines.push(side));
+	unit_square.sides.iter().for_each(|side| lines.push(side, 0));
 
 	for round in 0..2 {
 		make_round(round, &mut points, &mut lines, unit_square);
@@ -124,7 +123,7 @@ fn main () {
 	// temporarily put a tuple in a tuple
 	// (line, number_of_repeats, (clipping_success, segment))
 	let mut segments: Vec<(Segment, u64)> = flat_lines.iter()
-		.map(|el: &(Line, u64)| (el.0, el.1, unit_square.clip(el.0)))
+		.map(|el: &(Line, u64, u8)| (el.0, el.1, unit_square.clip(el.0)))
 		.filter(|el: &(Line, u64, (bool, Segment))| (el.2).0)
 		.map(|el| ( (el.2).1, el.1) )
 		.collect();

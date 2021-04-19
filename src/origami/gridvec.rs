@@ -33,6 +33,7 @@ pub fn make_grid () -> GridVec {
 }
 
 impl GridVec {
+	// pub fn push (&mut self, point: Vector, axiom: u8) {
 	pub fn push (&mut self, point: Vector) {
 		let idx = point_to_index(point);
 		self.buckets[idx.0][idx.1].push((point, 1));

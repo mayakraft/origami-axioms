@@ -4,6 +4,9 @@ use std::io::prelude::*;
 use rabbit_ear as ear;
 use self::ear::Vector;
 use self::ear::Segment;
+use origami::CountPoint;
+use origami::CountLine;
+use origami::CountSegment;
 
 const STROKE_W: f64 = 0.0002;
 const RADIUS: f64 = 0.001;
@@ -24,7 +27,7 @@ fn scale_float (opacity: f64) -> f64 {
 	// let opacity: f64 = pct.powf(0.75);
 }
 
-fn circle_elements (points: &Vec<(Vector, u64)>) -> String {
+fn circle_elements (points: &Vec<CountPoint>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	// get the largest repeat value. scale all others in relation to this
 	let mut repeat_max_u64: u64 = 0;
@@ -52,7 +55,7 @@ fn circle_elements (points: &Vec<(Vector, u64)>) -> String {
 	return string;
 }
 
-fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
+fn line_elements (segments: &Vec<CountSegment>) -> String {
 	let mut strings: Vec<String> = Vec::new();
 	// get the largest repeat value. scale all others in relation to this
 	let mut repeat_max_u64: u64 = 0;
@@ -87,7 +90,7 @@ fn line_elements (segments: &Vec<(Segment, u64)>) -> String {
 	return string;
 }
 
-pub fn svg_lines(segments: &Vec<(Segment, u64)>) -> String {
+pub fn svg_lines(segments: &Vec<CountSegment>) -> String {
 	let mut svg: String = String::new();
 	svg.push_str(&SVG_HEADER.to_string());
 	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
@@ -99,7 +102,7 @@ pub fn svg_lines(segments: &Vec<(Segment, u64)>) -> String {
 	return svg;
 }
 
-pub fn svg_points(points: &Vec<(Vector, u64)>) -> String {
+pub fn svg_points(points: &Vec<CountPoint>) -> String {
 	let mut svg: String = String::new();
 	svg.push_str(&SVG_HEADER.to_string());
 	svg.push_str("<rect x=\"-1\" y=\"-1\" width=\"3\" height=\"3\" fill=\"black\" stroke=\"none\" />\n");
@@ -117,7 +120,7 @@ fn write(filename: String, data: &String) -> std::io::Result<()> {
 	Ok(())
 }
 
-pub fn draw (segments: &Vec<(Segment, u64)>, points: &Vec<(Vector, u64)>) {
+pub fn draw (segments: &Vec<CountSegment>, points: &Vec<CountPoint>) {
 	println!("DRAW");
 	// fs::create_dir_all("/images")?;
 	let _res_p = write("points.svg".to_string(), &svg_points(points));

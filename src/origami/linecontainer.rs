@@ -1,5 +1,6 @@
 use rabbit_ear as ear;
 use self::ear::Line;
+use origami::CountLine;
 
 const BUCKET: usize = 10000;
 const BUCKET_F: f64 = 10000.0;
@@ -7,7 +8,7 @@ const BUCKET_F: f64 = 10000.0;
 // fn binary_search (&Vec<Line>
 
 pub struct LineContainer {
-	pub buckets: Vec<Vec<(Line, u64)>>
+	pub buckets: Vec<Vec<CountLine>>
 }
 
 fn point_to_index (line: &Line) -> usize {
@@ -18,15 +19,15 @@ fn point_to_index (line: &Line) -> usize {
 }
 
 pub fn make_line_container () -> LineContainer {
-	let mut buckets: Vec<Vec<(Line, u64)>> = Vec::new();
+	let mut buckets: Vec<Vec<CountLine>> = Vec::new();
 	for _i in 0..BUCKET {
-		let row: Vec<(Line, u64)> = Vec::new();
+		let row: Vec<CountLine> = Vec::new();
 		buckets.push(row);
 	}
 	return LineContainer { buckets };
 }
 
-// fn duplicate_line_check (line: &Line, lines: &mut Vec<(Line, u64)>) -> bool {
+// fn duplicate_line_check (line: &Line, lines: &mut Vec<CountLine>) -> bool {
 // 	for k in 0..lines.len() {
 // 		if line.equivalent(lines[k].0) {
 // 			lines[k].1 += 1;
@@ -37,9 +38,9 @@ pub fn make_line_container () -> LineContainer {
 // }
 
 impl LineContainer {
-	pub fn push (&mut self, line: &Line) {
+	pub fn push (&mut self, line: &Line, axiom: u8) {
 		let idx = point_to_index(line);
-		self.buckets[idx].push((*line, 1));
+		self.buckets[idx].push((*line, 1, axiom));
 	}
 	// return true if match found. false if no match
 	pub fn increment_match (&mut self, line: &Line) -> bool {
@@ -58,8 +59,8 @@ impl LineContainer {
 			self.buckets[i].append(&mut t.buckets[i]);
 		}
 	}
-	pub fn flatten (&self) -> Vec<(Line, u64)> {
-		let mut list: Vec<(Line, u64)> = Vec::new();
+	pub fn flatten (&self) -> Vec<CountLine> {
+		let mut list: Vec<CountLine> = Vec::new();
 		for i in 0..self.buckets.len() {
 			for j in 0..self.buckets[i].len() {
 				list.push(self.buckets[i][j]);
@@ -67,8 +68,8 @@ impl LineContainer {
 		}
 		return list;
 	}
-	// pub fn flatten_filter (&self, count: u64) -> Vec<(Line, u64)> {
-	// 	let mut list: Vec<(Line, u64)> = Vec::new();
+	// pub fn flatten_filter (&self, count: u64) -> Vec<CountLine> {
+	// 	let mut list: Vec<CountLine> = Vec::new();
 	// 	for i in 0..self.buckets.len() {
 	// 		for j in 0..self.buckets[i].len() {
 	// 			if self.buckets[i][j].1 >= count {

@@ -1,5 +1,6 @@
 use rabbit_ear::Vector;
 use rabbit_ear::Line;
+use rabbit_ear::Segment;
 
 pub mod gridvec;
 // pub mod quadtree;
@@ -10,7 +11,8 @@ pub mod draw;
 // tuple pairs for point and line with a second parameter
 // which keeps track of how many repeated occurences there are
 pub type CountPoint = (Vector, u64);
-pub type CountLine = (Line, u64);
+pub type CountLine = (Line, u64, u8);
+pub type CountSegment = (Segment, u64);
 
 pub use self::make::make_intersections;
 pub use self::make::make_axiom1;
